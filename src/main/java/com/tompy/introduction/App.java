@@ -41,7 +41,6 @@ public class App {
         Adventure adventure = new Introduction(player, entityService, new EntityFacadeBuilderFactoryImpl(entityService),
             new ExitBuilderFactoryImpl(), ui, outStream);
 
-        //Journey journey = new JourneyImpl(player, adventure, entityService);
         AdventureStateFactory stateFactory = new AdventureStateFactoryImpl(player, adventure, ui, outStream);
 
         LOGGER.info("Player [{}] enters the adventure", player.getName());
@@ -52,7 +51,7 @@ public class App {
 
         adventure.create(stateFactory);
 
-        adventure.start(stateFactory.createExploreState());
+        adventure.start(stateFactory.getExploreState());
 
         outStream.println(String.format("%s has left the adventure.", player.getName()));
 
