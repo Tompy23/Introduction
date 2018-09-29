@@ -2,10 +2,7 @@ package com.tompy.introduction;
 
 import com.tompy.adventure.api.Adventure;
 import com.tompy.adventure.internal.AdventureImpl;
-import com.tompy.directive.ActionType;
-import com.tompy.directive.EncounterType;
-import com.tompy.directive.EventType;
-import com.tompy.directive.TriggerType;
+import com.tompy.directive.*;
 import com.tompy.entity.EntityUtil;
 import com.tompy.entity.api.EntityFacade;
 import com.tompy.entity.api.EntityFacadeBuilderFactory;
@@ -28,12 +25,11 @@ import java.io.PrintStream;
 import static com.tompy.attribute.api.Attribute.LOCKED;
 import static com.tompy.attribute.api.Attribute.VALUE;
 import static com.tompy.directive.Direction.*;
-import static com.tompy.directive.EventType.ENCOUNTER;
 import static com.tompy.directive.EventType.FEATURE_SEARCH;
+import static com.tompy.directive.EventType.INTERACTION;
 import static com.tompy.directive.FeatureType.FEATURE_CHEST;
 import static com.tompy.directive.FeatureType.FEATURE_DOOR;
-import static com.tompy.directive.ItemType.ITEM_GEM;
-import static com.tompy.directive.ItemType.ITEM_KEY;
+import static com.tompy.directive.ItemType.*;
 
 public class Introduction extends AdventureImpl implements Adventure {
     private static final Logger LOGGER = LogManager.getLogger(Introduction.class);
@@ -44,7 +40,8 @@ public class Introduction extends AdventureImpl implements Adventure {
         super(player, entityService, entityFacadeBuilderFactory, exitBuilderFactory, userInput, outStream);
     }
 
-    @Override public void create(AdventureStateFactory stateFactory) {
+    @Override
+    public void create(AdventureStateFactory stateFactory) {
         LOGGER.info("Creating adventure...");
         // Areas
         Area room1 = entityService.createAreaBuilder().name("Room1").build();
@@ -55,43 +52,46 @@ public class Introduction extends AdventureImpl implements Adventure {
 
         Area room4 = entityService.createAreaBuilder().name("Room4").build();
 
+        Area room5 = entityService.createAreaBuilder().name("Room5").build();
+
 
         // Events
-        Event room1Enter = entityService.createEventBuilder().name("room1Describe").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS).responses(
-                        "Well lit empty room with bright white walls and dark blue carpet.  In the center of the room " +
-                                "sits ${room1Chest|open} large wooden box.").entity(room1).build();
+        Event room1Enter =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses(
+                                "Well lit empty room with bright white walls and dark blue carpet.  In the center of the room " +
+                                        "sits ${room1Chest|open} large wooden box.").entity(room1).build();
 
-        Event room1Search = entityService.createEventBuilder().name("room1Search").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS).responses(
-                        "There is nothing special about this room.  There is ${room2SouthDoor|open|an open|a closed} " +
-                                "door to the north.").entity(room1).build();
+        Event room1Search =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses(
+                                "There is nothing special about this room.  There is ${room2SouthDoor|open|an open|a closed} " +
+                                        "door to the north.").entity(room1).build();
 
         entityService.add(room1, EventType.AREA_ENTER, room1Enter);
         entityService.add(room1, EventType.AREA_SEARCH, room1Search);
 
-        Event room2Enter = entityService.createEventBuilder().name("room2Enter").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS).responses(
-                        "A hallway that bends to the right.  It is well let with white walls and a dark blue well worn carpet" +
-                                ".").entity(room2).build();
+        Event room2Enter =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses(
+                                "A hallway that bends to the right.  It is well let with white walls and a dark blue well worn carpet" +
+                                        ".").entity(room2).build();
 
-        Event room2Search = entityService.createEventBuilder().name("room2Search").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS)
-                .responses("Along both sides of the hallway are portraits of previous tenants, some quite old.")
-                .entity(room2).build();
+        Event room2Search =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses("Along both sides of the hallway are portraits of previous tenants, some quite old.")
+                        .entity(room2).build();
 
         Event room2SearchSouth =
-                entityService.createEventBuilder().name("room2SearchSouth").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS)
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
                         .responses("A hallway leading south to ${room2SouthDoor|open} door.").entity(room2).build();
 
         Event room2SearchEast =
-                entityService.createEventBuilder().name("room2SearchEast").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS)
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
                         .responses("A hallway leading east to ${room2EastDoor|open} door").entity(room2).build();
 
 
-        // ENCOUNTER EXAMPLE
+        // INTERACTION EXAMPLE
         Encounter room2WestPortal =
                 entityService.createEncounterBuilder(player, this).type(EncounterType.ENVIRONMENT).build();
 
@@ -103,22 +103,21 @@ public class Introduction extends AdventureImpl implements Adventure {
                         .entity(room2).memo("Back away from the portal").stateFactory(stateFactory)
                         .responses("There is a bright flash of light.", "The portal closes.").build();
 
-        entityService.add(room2WestPortal, ENCOUNTER, room2WestPortalJumpIn);
-        entityService.add(room2WestPortal, ENCOUNTER, room2WestPortalExplore);
+        entityService.add(room2WestPortal, INTERACTION, room2WestPortalJumpIn);
+        entityService.add(room2WestPortal, INTERACTION, room2WestPortalExplore);
 
         Event room2SearchWest0 =
-                entityService.createEventBuilder().name("room2SearchWest0").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ONCE_DELAY).delay(1).entity(room2)
-                        .responses("You see a crack forming in the wall").build();
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ONCE_DELAY)
+                        .delay(1).entity(room2).responses("You see a crack forming in the wall").build();
 
         Event room2SearchWest1 =
-                entityService.createEventBuilder().name("room2SearchWest2").actionType(ActionType.ENCOUNTER)
-                        .stateFactory(stateFactory).triggerType(TriggerType.ONCE_DELAY).delay(2).entity(room2)
-                        .encounter(room2WestPortal).responses("A dark writhing portal opens before you.").build();
+                entityService.createEventBuilder().actionType(ActionType.ENCOUNTER).stateFactory(stateFactory)
+                        .triggerType(TriggerType.ONCE_DELAY).delay(2).entity(room2).encounter(room2WestPortal)
+                        .responses("A dark writhing portal opens before you.").build();
 
         entityService.add(room2, EventType.AREA_WEST_SEARCH, room2SearchWest0);
         entityService.add(room2, EventType.AREA_WEST_SEARCH, room2SearchWest1);
-        // END ENCOUNTER EXAMPLE
+        // END INTERACTION EXAMPLE
 
 
         entityService.add(room2, EventType.AREA_ENTER, room2Enter);
@@ -127,22 +126,21 @@ public class Introduction extends AdventureImpl implements Adventure {
         entityService.add(room2, EventType.AREA_EAST_SEARCH, room2SearchEast);
 
 
-        Event room3Enter = entityService.createEventBuilder().name("room3Enter").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS).responses("This room has a single torch, making it smoky and dark.")
-                .entity(room3).build();
+        Event room3Enter =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses("This room has a single torch, making it smoky and dark.").entity(room3).build();
 
-        Event room3Search = entityService.createEventBuilder().name("room3Search").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS)
-                .responses("There is nothing to see, but the smoke seems to be building up.").entity(room3).build();
+        Event room3Search =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses("There is nothing to see, but the smoke seems to be building up.").entity(room3)
+                        .build();
 
         Event room3SearchWest =
-                entityService.createEventBuilder().name("room3SearchSouth").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS).responses("${room2EastDoor|open|An open|A closed} door")
-                        .entity(room3).build();
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses("${room2EastDoor|open|An open|A closed} door").entity(room3).build();
 
         Event room3SearchNorth =
-                entityService.createEventBuilder().name("room3SearchNorth").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS)
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
                         .responses("${room3NorthDoor|open|An open|A closed} curtain seems to cover something.")
                         .entity(room3).build();
 
@@ -152,21 +150,63 @@ public class Introduction extends AdventureImpl implements Adventure {
         entityService.add(room3, EventType.AREA_NORTH_SEARCH, room3SearchNorth);
 
         Event room4Enter = entityService.createEventBuilder().name("room4Enter").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS).responses("You have made it outside").entity(room4).build();
+                .triggerType(TriggerType.ALWAYS).responses("You have made it outside", "To the north is a cave.",
+                        "To the east is a merchant's tent with a beautiful women standing behind a counter.")
+                .entity(room4).build();
 
         entityService.add(room4, EventType.AREA_ENTER, room4Enter);
+
+        // Room 5 merchant
+        Item simpleDagger =
+                entityService.createItemBuilder().name("dagger1").description("sharp dagger").type(ItemType.ITEM_WEAPON)
+                        .build();
+        Item simpleSword =
+                entityService.createItemBuilder().name("sword1").description("long sword").type(ITEM_WEAPON).build();
+        Item simpleShield =
+                entityService.createItemBuilder().name("shield1").description("round shield").type(ITEM_WEAPON).build();
+
+        entityService.add(simpleDagger, VALUE, 3);
+        entityService.add(simpleSword, VALUE, 12);
+        entityService.add(simpleShield, VALUE, 8);
+
+        Encounter room5Merchant = entityService.createEncounterBuilder(player, this).type(EncounterType.MERCHANT)
+                .items(new Item[]{simpleDagger, simpleSword, simpleShield}).sellRate(.8).buyRate(1.2).build();
+
+        Event room5MerchantChat =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .memo("Want to know how to get more money?").entity(room5Merchant)
+                        .responses("Search opposite the door in the hallway with the pictures.").build();
+
+        Event room5MerchantGoodbye =
+                entityService.createEventBuilder().actionType(ActionType.EXPLORE).triggerType(TriggerType.ALWAYS)
+                        .entity(room5Merchant).stateFactory(stateFactory).responses("Goodbye").memo("Goodbye").build();
+
+        entityService.add(room5Merchant, INTERACTION, room5MerchantChat);
+        entityService.add(room5Merchant, INTERACTION, room5MerchantGoodbye);
+
+        Event room5Enter =
+                entityService.createEventBuilder().actionType(ActionType.ENCOUNTER).triggerType(TriggerType.ALWAYS)
+                        .encounter(room5Merchant).responses("You see a lovely lady standing behind a counter.")
+                        .entity(room5Merchant).stateFactory(stateFactory).build();
+
+        entityService.add(room5, EventType.AREA_ENTER, room5Enter);
+        // END room 5 merchant
 
 
         // Exits
         Exit exit1 = exitBuilderFactory.builder().area(room2).area(room1).state(false).build();
         Exit exit2 = exitBuilderFactory.builder().area(room3).area(room2).state(false).build();
         Exit exit3 = exitBuilderFactory.builder().area(room3).area(room4).state(false).build();
+        Exit exit4 = exitBuilderFactory.builder().area(room4).area(room5).state(true).build();
 
         room1.installExit(DIRECTION_NORTH, exit1);
         room2.installExit(DIRECTION_SOUTH, exit1);
         room2.installExit(DIRECTION_EAST, exit2);
         room3.installExit(DIRECTION_WEST, exit2);
         room3.installExit(DIRECTION_NORTH, exit3);
+        room4.installExit(DIRECTION_SOUTH, exit3);
+        room4.installExit(DIRECTION_EAST, exit4);
+        room5.installExit(DIRECTION_WEST, exit4);
 
 
         // Features
@@ -187,27 +227,23 @@ public class Introduction extends AdventureImpl implements Adventure {
                 entityFacadeBuilderFactory.builder().entity(room2EastDoor).attribute(LOCKED).build();
 
         Event room1ChestSearch =
-                entityService.createEventBuilder().name("room1ChestSearch").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS)
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
                         .responses("an old and dusty ${room1Chest|open|open|closed} chest").entity(room1Chest).build();
         entityService.add(room1Chest, FEATURE_SEARCH, room1ChestSearch);
 
         Event room2EastDoorSearch =
-                entityService.createEventBuilder().name("room2EastDoorSearch").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS).responses("You see ${room2EastDoor|open} iron door")
-                        .entity(room2EastDoor).build();
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .responses("You see ${room2EastDoor|open} iron door").entity(room2EastDoor).build();
         entityService.add(room2EastDoor, FEATURE_SEARCH, room2EastDoorSearch);
 
         Event room2SouthDoorSearch =
-                entityService.createEventBuilder().name("room2SouthDoorSearch").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS)
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
                         .responses("You see ${room2SouthDoor|open} old wooden oak door.").entity(room2SouthDoor)
                         .build();
         entityService.add(room2SouthDoor, FEATURE_SEARCH, room2SouthDoorSearch);
 
         Event room3NorthDoorSearch =
-                entityService.createEventBuilder().name("room3NorthDoorSearch").actionType(ActionType.DESCRIBE)
-                        .triggerType(TriggerType.ALWAYS)
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
                         .responses("${room3NorthDoor|open|An open|A closed} dark and dusty curtain")
                         .entity(room3NorthDoor).build();
         entityService.add(room3NorthDoor, FEATURE_SEARCH, room3NorthDoorSearch);
@@ -244,6 +280,7 @@ public class Introduction extends AdventureImpl implements Adventure {
         entityService.addArea(room2);
         entityService.addArea(room3);
         entityService.addArea(room4);
+        entityService.addArea(room5);
 
         LOGGER.info("...complete.");
     }
