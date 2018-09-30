@@ -25,10 +25,8 @@ import java.io.PrintStream;
 import static com.tompy.attribute.api.Attribute.LOCKED;
 import static com.tompy.attribute.api.Attribute.VALUE;
 import static com.tompy.directive.Direction.*;
-import static com.tompy.directive.EventType.FEATURE_SEARCH;
-import static com.tompy.directive.EventType.INTERACTION;
-import static com.tompy.directive.FeatureType.FEATURE_CHEST;
-import static com.tompy.directive.FeatureType.FEATURE_DOOR;
+import static com.tompy.directive.EventType.*;
+import static com.tompy.directive.FeatureType.*;
 import static com.tompy.directive.ItemType.*;
 
 public class Introduction extends AdventureImpl implements Adventure {
@@ -53,6 +51,10 @@ public class Introduction extends AdventureImpl implements Adventure {
         Area room4 = entityService.createAreaBuilder().name("Room4").build();
 
         Area room5 = entityService.createAreaBuilder().name("Room5").build();
+
+        Area room6 = entityService.createAreaBuilder().name("Room6").build();
+
+        Area room7 = entityService.createAreaBuilder().name("Room7").build();
 
 
         // Events
@@ -120,6 +122,12 @@ public class Introduction extends AdventureImpl implements Adventure {
         // END INTERACTION EXAMPLE
 
 
+        Event room2SearchNorth1 =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS_DELAY)
+                        .entity(room2).delay(1)
+                        .responses("You find a door that was not there which is ${room2NorthDoor|open|open|closed}.")
+                        .build();
+
         entityService.add(room2, EventType.AREA_ENTER, room2Enter);
         entityService.add(room2, EventType.AREA_SEARCH, room2Search);
         entityService.add(room2, EventType.AREA_SOUTH_SEARCH, room2SearchSouth);
@@ -156,12 +164,15 @@ public class Introduction extends AdventureImpl implements Adventure {
 
         entityService.add(room4, EventType.AREA_ENTER, room4Enter);
 
+        Feature room6Monster = entityService.createFeatureBuilder().type(FEATURE_MONSTER).name("room6Monster")
+                .description("mean bloodthirsty orc").build();
+
         // Room 5 merchant
         Item simpleDagger =
                 entityService.createItemBuilder().name("dagger1").description("sharp dagger").type(ItemType.ITEM_WEAPON)
-                        .build();
-        Item simpleSword =
-                entityService.createItemBuilder().name("sword1").description("long sword").type(ITEM_WEAPON).build();
+                        .targetFeature(room6Monster).build();
+        Item simpleSword = entityService.createItemBuilder().name("sword1").description("long sword").type(ITEM_WEAPON)
+                .targetFeature(room6Monster).build();
         Item simpleShield =
                 entityService.createItemBuilder().name("shield1").description("round shield").type(ITEM_WEAPON).build();
 
@@ -192,24 +203,41 @@ public class Introduction extends AdventureImpl implements Adventure {
         entityService.add(room5, EventType.AREA_ENTER, room5Enter);
         // END room 5 merchant
 
+        // Room6
+        Event room6MonsterAttack = entityService.createEventBuilder().actionType(ActionType.HORRIBLE_DEATH)
+                .triggerType(TriggerType.ALWAYS_DELAY).delay(1).entity(room6Monster)
+                .responses("The orc swings his axe visciously at your head!").memo("Ouch!").build();
+        entityService.add(room6Monster, EventType.START_ROUND, room6MonsterAttack);
+        entityService.add(room6Monster, VALUE, 10);
+        // Room6 - END
+
 
         // Exits
         Exit exit1 = exitBuilderFactory.builder().area(room2).area(room1).state(false).build();
         Exit exit2 = exitBuilderFactory.builder().area(room3).area(room2).state(false).build();
         Exit exit3 = exitBuilderFactory.builder().area(room3).area(room4).state(false).build();
         Exit exit4 = exitBuilderFactory.builder().area(room4).area(room5).state(true).build();
+        Exit exit5 = exitBuilderFactory.builder().area(room4).area(room6).state(true).build();
+        Exit exit6 = exitBuilderFactory.builder().area(room2).area(room7).state(false).build();
 
         room1.installExit(DIRECTION_NORTH, exit1);
         room2.installExit(DIRECTION_SOUTH, exit1);
         room2.installExit(DIRECTION_EAST, exit2);
+        room2.installExit(DIRECTION_NORTH, exit6);
         room3.installExit(DIRECTION_WEST, exit2);
         room3.installExit(DIRECTION_NORTH, exit3);
         room4.installExit(DIRECTION_SOUTH, exit3);
         room4.installExit(DIRECTION_EAST, exit4);
         room5.installExit(DIRECTION_WEST, exit4);
+        room4.installExit(DIRECTION_NORTH, exit5);
+        room6.installExit(DIRECTION_SOUTH, exit5);
 
 
         // Features
+        Feature room2NorthDoor =
+                entityService.createFeatureBuilder().name("room2NorthDoor").description("secret door behind a picture")
+                        .type(FEATURE_DOOR).exit(exit6).build();
+
         Feature room1Chest =
                 entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room1Chest").description("dusty chest")
                         .build();
@@ -222,9 +250,57 @@ public class Introduction extends AdventureImpl implements Adventure {
         Feature room3NorthDoor = entityService.createFeatureBuilder().type(FEATURE_DOOR).name("room3NorthDoor")
                 .description("dark curtain").exit(exit3).build();
 
-        EntityFacade room1ChestLock = entityFacadeBuilderFactory.builder().entity(room1Chest).attribute(LOCKED).build();
-        EntityFacade room2EastDoorLock =
-                entityFacadeBuilderFactory.builder().entity(room2EastDoor).attribute(LOCKED).build();
+        Feature room7ChestRed =
+                entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room7ChestRed").description("red chest")
+                        .build();
+
+        Feature room7ChestWhite = entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room7ChestWhite")
+                .description("white chest").build();
+
+        Feature room7ChestBlue = entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room7ChestBlue")
+                .description("blue chest").build();
+
+        Feature room7Table =
+                entityService.createFeatureBuilder().description("large granite pedestal").type(FEATURE_BASIC)
+                        .name("room7Table").build();
+
+        Event room7Search =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS_DELAY)
+                        .entity(room7).responses("You see 3 chests aligned to the right and a pedestal with 3 keys.")
+                        .build();
+        Event room7TableSearch =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .entity(room7Table).responses("You see a round smooth 3 foot tall granite pedestal.").build();
+        Event room7ChestRedSearch =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .entity(room7ChestRed).responses(
+                        "${room7ChestRed|open|An open|A closed} and ${room7ChestRed|locked} red chest on the floor.")
+                        .build();
+        Event room7ChestWhiteSearch =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .entity(room7ChestWhite).responses(
+                        "${room7ChestWhite|open|An open|A closed} and ${room7ChestWhite|locked} white chest on the floor.")
+                        .build();
+        Event room7ChestBlueSearch =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
+                        .entity(room7ChestBlue).responses(
+                        "${room7ChestBlue|open|An open|A closed} and ${room7ChestBlue|locked} blue chest on the floor.")
+                        .build();
+
+        entityService.add(room7, AREA_SEARCH, room7Search);
+        entityService.add(room7, AREA_ENTER, room7Search);
+        entityService.add(room7Table, FEATURE_SEARCH, room7TableSearch);
+        entityService.add(room7ChestRed, FEATURE_SEARCH, room7ChestRedSearch);
+        entityService.add(room7ChestWhite, FEATURE_SEARCH, room7ChestWhiteSearch);
+        entityService.add(room7ChestBlue, FEATURE_SEARCH, room7ChestBlueSearch);
+
+        Event room2SearchNorth2 = entityService.createEventBuilder().actionType(ActionType.MAKE_VISIBLE)
+                .triggerType(TriggerType.ONCE_DELAY).entity(room2NorthDoor).delay(1)
+                .responses("A door suddenly appears.").build();
+
+        entityService.add(room2, AREA_NORTH_SEARCH, room2SearchNorth1);
+        entityService.add(room2, AREA_NORTH_SEARCH, room2SearchNorth2);
+
 
         Event room1ChestSearch =
                 entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
@@ -249,6 +325,10 @@ public class Introduction extends AdventureImpl implements Adventure {
         entityService.add(room3NorthDoor, FEATURE_SEARCH, room3NorthDoorSearch);
 
 
+        EntityFacade room1ChestLock = entityFacadeBuilderFactory.builder().entity(room1Chest).attribute(LOCKED).build();
+        EntityFacade room2EastDoorLock =
+                entityFacadeBuilderFactory.builder().entity(room2EastDoor).attribute(LOCKED).build();
+
         EntityUtil.add(room1ChestLock);
         EntityUtil.add(room2EastDoorLock);
 
@@ -256,8 +336,14 @@ public class Introduction extends AdventureImpl implements Adventure {
         room1.installFeature(room2SouthDoor, DIRECTION_NORTH);
         room2.installFeature(room2EastDoor, DIRECTION_EAST);
         room2.installFeature(room2SouthDoor, DIRECTION_SOUTH);
+        room2.installFeature(room2NorthDoor, DIRECTION_NORTH);
         room3.installFeature(room2EastDoor, DIRECTION_WEST);
         room3.installFeature(room3NorthDoor, DIRECTION_NORTH);
+        room6.installFeature(room6Monster, null);
+        room7.installFeature(room7Table, null);
+        room7.installFeature(room7ChestBlue, null);
+        room7.installFeature(room7ChestRed, null);
+        room7.installFeature(room7ChestWhite, null);
 
 
         // Items.
@@ -267,13 +353,35 @@ public class Introduction extends AdventureImpl implements Adventure {
                 .targetFeature(room1Chest).build();
         Item gem1 =
                 entityService.createItemBuilder().type(ITEM_GEM).name("gem1").description("sparkling red ruby").build();
+        Item gem2 = entityService.createItemBuilder().type(ITEM_GEM).name("gem2").description("bright shiny diamond")
+                .build();
+        Item potion1 =
+                entityService.createItemBuilder().type(ITEM_POTION).name("potion1").description("cure poison potion")
+                        .build();
+        Item keyGold = entityService.createItemBuilder().type(ITEM_KEY).name("keyGold").description("gold key")
+                .targetFeature(room7ChestBlue).build();
+        Item keySilver = entityService.createItemBuilder().type(ITEM_KEY).name("keySilver").description("silver key")
+                .targetFeature(room7ChestRed).build();
+        Item keyBronze = entityService.createItemBuilder().type(ITEM_KEY).name("keyBronze").description("bronze key")
+                .targetFeature(room7ChestWhite).build();
 
-        EntityFacade gem1Value = entityFacadeBuilderFactory.builder().entity(gem1).attribute(VALUE).build();
-        EntityUtil.add(gem1Value, 5);
+        entityService.add(gem1, VALUE, 5);
+        entityService.add(gem2, VALUE, 20);
 
         room1Chest.addItem(gem1);
         room1.addItem(key1);
         room3.addItem(key2);
+
+        room7.addItem(keyGold);
+        room7.addItem(keySilver);
+        room7.addItem(keyBronze);
+
+        room7ChestWhite.addItem(potion1);
+        room7ChestRed.addItem(gem2);
+
+        entityService.add(room7ChestBlue, LOCKED);
+        entityService.add(room7ChestRed, LOCKED);
+        entityService.add(room7ChestWhite, LOCKED);
 
         // Summary
         entityService.addArea(room1);
@@ -281,6 +389,8 @@ public class Introduction extends AdventureImpl implements Adventure {
         entityService.addArea(room3);
         entityService.addArea(room4);
         entityService.addArea(room5);
+        entityService.addArea(room6);
+        entityService.addArea(room7);
 
         LOGGER.info("...complete.");
     }
