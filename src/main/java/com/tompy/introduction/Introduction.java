@@ -22,8 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.PrintStream;
 
-import static com.tompy.attribute.api.Attribute.LOCKED;
-import static com.tompy.attribute.api.Attribute.VALUE;
+import static com.tompy.attribute.api.Attribute.*;
 import static com.tompy.directive.Direction.*;
 import static com.tompy.directive.EventType.*;
 import static com.tompy.directive.FeatureType.*;
@@ -261,7 +260,7 @@ public class Introduction extends AdventureImpl implements Adventure {
                 .description("blue chest").build();
 
         Feature room7Table =
-                entityService.createFeatureBuilder().description("large granite pedestal").type(FEATURE_BASIC)
+                entityService.createFeatureBuilder().description("large granite pedestal").type(FEATURE_TABLE)
                         .name("room7Table").build();
 
         Event room7Search =
@@ -372,12 +371,18 @@ public class Introduction extends AdventureImpl implements Adventure {
         room1.addItem(key1);
         room3.addItem(key2);
 
-        room7.addItem(keyGold);
-        room7.addItem(keySilver);
-        room7.addItem(keyBronze);
+        entityService.add(keyGold, VISIBLE);
+        entityService.add(keySilver, VISIBLE);
+        entityService.add(keyBronze, VISIBLE);
+
+        room7Table.addItem(keyGold);
+        room7Table.addItem(keySilver);
+        room7Table.addItem(keyBronze);
+
 
         room7ChestWhite.addItem(potion1);
         room7ChestRed.addItem(gem2);
+
 
         entityService.add(room7ChestBlue, LOCKED);
         entityService.add(room7ChestRed, LOCKED);
