@@ -21,6 +21,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.tompy.attribute.api.Attribute.*;
 import static com.tompy.directive.Direction.*;
@@ -286,12 +288,43 @@ public class Introduction extends AdventureImpl implements Adventure {
                         "${room7ChestBlue|open|An open|A closed} and ${room7ChestBlue|locked} blue chest on the floor.")
                         .build();
 
+        Event room7ChestTrap2 =
+                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ONCE_DELAY)
+                        .delay(2).entity(room7ChestRed)
+                        .responses("The poison courses through your veins, you feel weak.").build();
+        Event room7ChestTrap3 = entityService.createEventBuilder().actionType(ActionType.HORRIBLE_DEATH)
+                .triggerType(TriggerType.ONCE_DELAY).delay(4).entity(room7ChestRed)
+                .responses("The poison enters your brain, your body becomes paralyzed... you can't breath... you die.")
+                .build();
+
+        List<Event> room7ChestTraps = new ArrayList<>();
+        room7ChestTraps.add(room7ChestTrap2);
+        room7ChestTraps.add(room7ChestTrap3);
+
+        Event room7ChestRedTrap1 =
+                entityService.createEventBuilder().actionType(ActionType.ADD_EVENT).triggerType(TriggerType.ONCE)
+                        .eventType(EXPLORING).events(room7ChestTraps).entity(room7ChestRed)
+                        .responses("You feel a small prick in your finger as you turn the key.").build();
+        Event room7ChestWhiteTrap1 =
+                entityService.createEventBuilder().actionType(ActionType.ADD_EVENT).triggerType(TriggerType.ONCE)
+                        .eventType(EXPLORING).events(room7ChestTraps).entity(room7ChestWhite)
+                        .responses("You feel a small prick in your finger as you turn the key.").build();
+        Event room7ChestBlueTrap1 =
+                entityService.createEventBuilder().actionType(ActionType.ADD_EVENT).triggerType(TriggerType.ONCE)
+                        .eventType(EXPLORING).events(room7ChestTraps).entity(room7ChestBlue)
+                        .responses("You feel a small prick in your finger as you turn the key.").build();
+
         entityService.add(room7, AREA_SEARCH, room7Search);
         entityService.add(room7, AREA_ENTER, room7Search);
         entityService.add(room7Table, FEATURE_SEARCH, room7TableSearch);
         entityService.add(room7ChestRed, FEATURE_SEARCH, room7ChestRedSearch);
         entityService.add(room7ChestWhite, FEATURE_SEARCH, room7ChestWhiteSearch);
         entityService.add(room7ChestBlue, FEATURE_SEARCH, room7ChestBlueSearch);
+
+        entityService.add(room7ChestRed, FEATURE_TRAP, room7ChestRedTrap1);
+        entityService.add(room7ChestWhite, FEATURE_TRAP, room7ChestWhiteTrap1);
+        entityService.add(room7ChestBlue, FEATURE_TRAP, room7ChestBlueTrap1);
+
 
         Event room2SearchNorth2 = entityService.createEventBuilder().actionType(ActionType.MAKE_VISIBLE)
                 .triggerType(TriggerType.ONCE_DELAY).entity(room2NorthDoor).delay(1)
