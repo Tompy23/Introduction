@@ -57,8 +57,7 @@ public class App {
 
         adventure.create(stateFactory);
 
-        player.addMoney(20);
-        adventure.start(stateFactory.getExploreState(), "room5");
+        adventure.start(stateFactory.getExploreState(), "StartRoom");
 
         outStream.println(String.format("%s has left the adventure.", player.getName()));
 
