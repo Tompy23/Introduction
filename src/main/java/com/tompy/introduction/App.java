@@ -35,23 +35,30 @@ public class App {
         InputStream inStream = System.in;
         PrintStream outStream = System.out;
         EntityService entityService =
-            new EntityServiceImpl(new AttributeManagerFactoryImpl(), new EventManagerFactoryImpl());
+                new EntityServiceImpl(new AttributeManagerFactoryImpl(), new EventManagerFactoryImpl());
         UserInput ui = new UserInputTextImpl(inStream, outStream, entityService);
         Player player = new PlayerImpl(ui.getResponse("Player name?"), null);
         Adventure adventure = new Introduction(player, entityService, new EntityFacadeBuilderFactoryImpl(entityService),
-            new ExitBuilderFactoryImpl(), ui, outStream);
+                new ExitBuilderFactoryImpl(), ui, outStream);
 
-        AdventureStateFactory stateFactory = new AdventureStateFactoryImpl(player, adventure, ui, outStream, entityService);
+        AdventureStateFactory stateFactory =
+                new AdventureStateFactoryImpl(player, adventure, ui, outStream, entityService);
 
         LOGGER.info("Player [{}] enters the adventure", player.getName());
 
-        outStream.println(String
-            .format("%s, you are about to enter a world of adventure... you find yourself in an area...",
-                player.getName()));
+        outStream.println(
+                String.format("%s, you are about to enter a world of adventure... you find yourself in an area...",
+                        player.getName()));
+        outStream.println("You have been tasked with defeating the orc to the north.");
+        outStream.println(
+                "You will find him in a cave.  First, you must acquire the necessary weapon to defeat the nasty orc and then venture into the cave and kill it.");
+        outStream.println(
+                "You are in a small room, which you have just entered from the south.  You cannot return... you much complete your quest.");
 
         adventure.create(stateFactory);
 
-        adventure.start(stateFactory.getExploreState());
+        player.addMoney(20);
+        adventure.start(stateFactory.getExploreState(), "room5");
 
         outStream.println(String.format("%s has left the adventure.", player.getName()));
 

@@ -2,9 +2,6 @@ package com.tompy.introduction;
 
 import com.tompy.adventure.api.Adventure;
 import com.tompy.adventure.internal.AdventureImpl;
-import com.tompy.directive.*;
-import com.tompy.entity.EntityUtil;
-import com.tompy.entity.api.EntityFacade;
 import com.tompy.entity.api.EntityFacadeBuilderFactory;
 import com.tompy.entity.api.EntityService;
 import com.tompy.entity.area.api.Area;
@@ -22,13 +19,18 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.tompy.attribute.api.Attribute.*;
+import static com.tompy.directive.ActionType.*;
 import static com.tompy.directive.Direction.*;
+import static com.tompy.directive.EncounterType.ENCOUNTER_ENVIRONMENT;
+import static com.tompy.directive.EncounterType.ENCOUNTER_MERCHANT;
 import static com.tompy.directive.EventType.*;
 import static com.tompy.directive.FeatureType.*;
 import static com.tompy.directive.ItemType.*;
+import static com.tompy.directive.TriggerType.*;
 
 public class Introduction extends AdventureImpl implements Adventure {
     private static final Logger LOGGER = LogManager.getLogger(Introduction.class);
@@ -42,393 +44,296 @@ public class Introduction extends AdventureImpl implements Adventure {
     @Override
     public void create(AdventureStateFactory stateFactory) {
         LOGGER.info("Creating adventure...");
+        this.stateFactory = stateFactory;
+
+        // First map out the adventure with areas and exits
         // Areas
-        Area room1 = entityService.createAreaBuilder().name("Room1").build();
-
-        Area room2 = entityService.createAreaBuilder().name("Room2").build();
-
-        Area room3 = entityService.createAreaBuilder().name("Room3").build();
-
-        Area room4 = entityService.createAreaBuilder().name("Room4").build();
-
-        Area room5 = entityService.createAreaBuilder().name("Room5").build();
-
-        Area room6 = entityService.createAreaBuilder().name("Room6").build();
-
-        Area room7 = entityService.createAreaBuilder().name("Room7").build();
-
-
-        // Events
-        Event room1Enter =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses(
-                                "Well lit empty room with bright white walls and dark blue carpet.  In the center of the room " +
-                                        "sits ${room1Chest|open} large wooden box.").entity(room1).build();
-
-        Event room1Search =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses(
-                                "There is nothing special about this room.  There is ${room2SouthDoor|open|an open|a closed} " +
-                                        "door to the north.").entity(room1).build();
-
-        entityService.add(room1, EventType.AREA_ENTER, room1Enter);
-        entityService.add(room1, EventType.AREA_SEARCH, room1Search);
-
-        Event room2Enter =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses(
-                                "A hallway that bends to the right.  It is well let with white walls and a dark blue well worn carpet" +
-                                        ".").entity(room2).build();
-
-        Event room2Search =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("Along both sides of the hallway are portraits of previous tenants, some quite old.")
-                        .entity(room2).build();
-
-        Event room2SearchSouth =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("A hallway leading south to ${room2SouthDoor|open} door.").entity(room2).build();
-
-        Event room2SearchEast =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("A hallway leading east to ${room2EastDoor|open} door").entity(room2).build();
-
-
-        // INTERACTION EXAMPLE
-        Encounter room2WestPortal =
-                entityService.createEncounterBuilder(player, this).type(EncounterType.ENVIRONMENT).build();
-
-        Event room2WestPortalJumpIn =
-                entityService.createEventBuilder().actionType(ActionType.HORRIBLE_DEATH).triggerType(TriggerType.ALWAYS)
-                        .entity(room2).memo("Jump into the portal").responses("Chaos engulfs you.", "You die.").build();
-        Event room2WestPortalExplore =
-                entityService.createEventBuilder().actionType(ActionType.EXPLORE).triggerType(TriggerType.ALWAYS)
-                        .entity(room2).memo("Back away from the portal").stateFactory(stateFactory)
-                        .responses("There is a bright flash of light.", "The portal closes.").build();
-
-        entityService.add(room2WestPortal, INTERACTION, room2WestPortalJumpIn);
-        entityService.add(room2WestPortal, INTERACTION, room2WestPortalExplore);
-
-        Event room2SearchWest0 =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ONCE_DELAY)
-                        .delay(1).entity(room2).responses("You see a crack forming in the wall").build();
-
-        Event room2SearchWest1 =
-                entityService.createEventBuilder().actionType(ActionType.ENCOUNTER).stateFactory(stateFactory)
-                        .triggerType(TriggerType.ONCE_DELAY).delay(2).entity(room2).encounter(room2WestPortal)
-                        .responses("A dark writhing portal opens before you.").build();
-
-        entityService.add(room2, EventType.AREA_WEST_SEARCH, room2SearchWest0);
-        entityService.add(room2, EventType.AREA_WEST_SEARCH, room2SearchWest1);
-        // END INTERACTION EXAMPLE
-
-
-        Event room2SearchNorth1 =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS_DELAY)
-                        .entity(room2).delay(1)
-                        .responses("You find a door that was not there which is ${room2NorthDoor|open|open|closed}.")
-                        .build();
-
-        entityService.add(room2, EventType.AREA_ENTER, room2Enter);
-        entityService.add(room2, EventType.AREA_SEARCH, room2Search);
-        entityService.add(room2, EventType.AREA_SOUTH_SEARCH, room2SearchSouth);
-        entityService.add(room2, EventType.AREA_EAST_SEARCH, room2SearchEast);
-
-
-        Event room3Enter =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("This room has a single torch, making it smoky and dark.").entity(room3).build();
-
-        Event room3Search =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("There is nothing to see, but the smoke seems to be building up.").entity(room3)
-                        .build();
-
-        Event room3SearchWest =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("${room2EastDoor|open|An open|A closed} door").entity(room3).build();
-
-        Event room3SearchNorth =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("${room3NorthDoor|open|An open|A closed} curtain seems to cover something.")
-                        .entity(room3).build();
-
-        entityService.add(room3, EventType.AREA_ENTER, room3Enter);
-        entityService.add(room3, EventType.AREA_SEARCH, room3Search);
-        entityService.add(room3, EventType.AREA_WEST_SEARCH, room3SearchWest);
-        entityService.add(room3, EventType.AREA_NORTH_SEARCH, room3SearchNorth);
-
-        Event room4Enter = entityService.createEventBuilder().name("room4Enter").actionType(ActionType.DESCRIBE)
-                .triggerType(TriggerType.ALWAYS).responses("You have made it outside", "To the north is a cave.",
-                        "To the east is a merchant's tent with a beautiful women standing behind a counter.")
-                .entity(room4).build();
-
-        entityService.add(room4, EventType.AREA_ENTER, room4Enter);
-
-        Feature room6Monster = entityService.createFeatureBuilder().type(FEATURE_MONSTER).name("room6Monster")
-                .description("mean bloodthirsty orc").build();
-
-        // Room 5 merchant
-        Item simpleDagger =
-                entityService.createItemBuilder().name("dagger1").description("sharp dagger").type(ItemType.ITEM_WEAPON)
-                        .targetFeature(room6Monster).build();
-        Item simpleSword = entityService.createItemBuilder().name("sword1").description("long sword").type(ITEM_WEAPON)
-                .targetFeature(room6Monster).build();
-        Item simpleShield =
-                entityService.createItemBuilder().name("shield1").description("round shield").type(ITEM_WEAPON).build();
-
-        entityService.add(simpleDagger, VALUE, 3);
-        entityService.add(simpleSword, VALUE, 12);
-        entityService.add(simpleShield, VALUE, 8);
-
-        Encounter room5Merchant = entityService.createEncounterBuilder(player, this).type(EncounterType.MERCHANT)
-                .items(new Item[]{simpleDagger, simpleSword, simpleShield}).sellRate(.8).buyRate(1.2).build();
-
-        Event room5MerchantChat =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .memo("Want to know how to get more money?").entity(room5Merchant)
-                        .responses("Search opposite the door in the hallway with the pictures.").build();
-
-        Event room5MerchantGoodbye =
-                entityService.createEventBuilder().actionType(ActionType.EXPLORE).triggerType(TriggerType.ALWAYS)
-                        .entity(room5Merchant).stateFactory(stateFactory).responses("Goodbye").memo("Goodbye").build();
-
-        entityService.add(room5Merchant, INTERACTION, room5MerchantChat);
-        entityService.add(room5Merchant, INTERACTION, room5MerchantGoodbye);
-
-        Event room5Enter =
-                entityService.createEventBuilder().actionType(ActionType.ENCOUNTER).triggerType(TriggerType.ALWAYS)
-                        .encounter(room5Merchant).responses("You see a lovely lady standing behind a counter.")
-                        .entity(room5Merchant).stateFactory(stateFactory).build();
-
-        entityService.add(room5, EventType.AREA_ENTER, room5Enter);
-        // END room 5 merchant
-
-        // Room6
-        Event room6MonsterAttack = entityService.createEventBuilder().actionType(ActionType.HORRIBLE_DEATH)
-                .triggerType(TriggerType.ALWAYS_DELAY).delay(1).entity(room6Monster)
-                .responses("The orc swings his axe visciously at your head!").memo("Ouch!").build();
-        entityService.add(room6Monster, EventType.START_ROUND, room6MonsterAttack);
-        entityService.add(room6Monster, VALUE, 10);
-        // Room6 - END
-
+        Area room1 = buildArea("StartRoom");
+        Area room2 = buildArea("room2");
+        Area room3 = buildArea("room3");
+        Area room4 = buildArea("room4");
+        Area room5 = buildArea("room5");
+        Area room6 = buildArea("room6");
+        Area room7 = buildArea("room7");
 
         // Exits
-        Exit exit1 = exitBuilderFactory.builder().area(room2).area(room1).state(false).build();
-        Exit exit2 = exitBuilderFactory.builder().area(room3).area(room2).state(false).build();
-        Exit exit3 = exitBuilderFactory.builder().area(room3).area(room4).state(false).build();
-        Exit exit4 = exitBuilderFactory.builder().area(room4).area(room5).state(true).build();
-        Exit exit5 = exitBuilderFactory.builder().area(room4).area(room6).state(true).build();
-        Exit exit6 = exitBuilderFactory.builder().area(room2).area(room7).state(false).build();
-
-        room1.installExit(DIRECTION_NORTH, exit1);
-        room2.installExit(DIRECTION_SOUTH, exit1);
-        room2.installExit(DIRECTION_EAST, exit2);
-        room2.installExit(DIRECTION_NORTH, exit6);
-        room3.installExit(DIRECTION_WEST, exit2);
-        room3.installExit(DIRECTION_NORTH, exit3);
-        room4.installExit(DIRECTION_SOUTH, exit3);
-        room4.installExit(DIRECTION_EAST, exit4);
-        room5.installExit(DIRECTION_WEST, exit4);
-        room4.installExit(DIRECTION_NORTH, exit5);
-        room6.installExit(DIRECTION_SOUTH, exit5);
+        Exit exit1 = buildExit(room1, DIRECTION_NORTH, room2, DIRECTION_SOUTH, false);
+        Exit exit2 = buildExit(room2, DIRECTION_EAST, room3, DIRECTION_WEST, false);
+        Exit exit3 = buildExit(room3, DIRECTION_NORTH, room4, DIRECTION_SOUTH, false);
+        Exit exit4 = buildExit(room4, DIRECTION_EAST, room5, DIRECTION_WEST, true);
+        Exit exit5 = buildExit(room4, DIRECTION_NORTH, room6, DIRECTION_SOUTH, true);
+        Exit exit6 = buildExit(room2, DIRECTION_NORTH, room7, DIRECTION_SOUTH, false);
 
 
-        // Features
+        // Detail each area
+        // Start Room
+        Feature room1Chest = buildFeature(FEATURE_CHEST, "room1.chest", "room1Chest");
+        add(room1Chest, LOCKED);
+
+        Event room1ChestSearch =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room1Chest, "room1.chest.search").build();
+        addEvent(room1Chest, EVENT_FEATURE_SEARCH, room1ChestSearch);
+
+        Feature room1NorthDoor =
+                featureBuilder(FEATURE_DOOR, "room1.door.north").name("room1NorthDoor").exit(exit1).build();
+
+        Event room1NorthDoorSearch =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room1NorthDoor, "room1.door.north.search").build();
+        addEvent(room1NorthDoor, EVENT_FEATURE_SEARCH, room1NorthDoorSearch);
+
+        Event room1Enter = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room1, "room1.enter").build();
+        addEvent(room1, EVENT_AREA_ENTER, room1Enter);
+
+        Event room1Search = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room1, "room1.search").build();
+        addEvent(room1, EVENT_AREA_SEARCH, room1Search);
+
+        room1.installFeature(room1Chest, null);
+        room1.installFeature(room1NorthDoor, DIRECTION_NORTH);
+
+        Item gem1 = buildItem(ITEM_GEM, "gem1");
+        add(gem1, VALUE, 5);
+        room1Chest.addItem(gem1);
+
+
+        // Room 2
         Feature room2NorthDoor =
-                entityService.createFeatureBuilder().name("room2NorthDoor").description("secret door behind a picture")
-                        .type(FEATURE_DOOR).exit(exit6).build();
+                featureBuilder(FEATURE_DOOR, "room2.door.north").name("room2NorthDoor").exit(exit6).build();
+        remove(room2NorthDoor, VISIBLE);
 
-        Feature room1Chest =
-                entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room1Chest").description("dusty chest")
-                        .build();
         Feature room2EastDoor =
-                entityService.createFeatureBuilder().type(FEATURE_DOOR).name("room2EastDoor").description("iron door")
-                        .exit(exit2).build();
-        Feature room2SouthDoor =
-                entityService.createFeatureBuilder().type(FEATURE_DOOR).name("room2SouthDoor").description("oak door")
-                        .exit(exit1).build();
-        Feature room3NorthDoor = entityService.createFeatureBuilder().type(FEATURE_DOOR).name("room3NorthDoor")
-                .description("dark curtain").exit(exit3).build();
+                featureBuilder(FEATURE_DOOR, "room2.door.east").name("room2EastDoor").exit(exit2).build();
+        add(room2EastDoor, LOCKED);
 
-        Feature room7ChestRed =
-                entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room7ChestRed").description("red chest")
+        Event room2EastDoorSearch =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room2EastDoor, "room2.door.east.search").build();
+        addEvent(room2EastDoor, EVENT_FEATURE_SEARCH, room2EastDoorSearch);
+
+        Event room2Enter = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room2, "room2.enter").build();
+        addEvent(room2, EVENT_AREA_ENTER, room2Enter);
+
+        Event room2Search = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room2, "room2.search").build();
+        addEvent(room2, EVENT_AREA_SEARCH, room2Search);
+
+        Event room2SearchSouth = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room2, "room2.search.south").build();
+        addEvent(room2, EVENT_AREA_SOUTH_SEARCH, room2SearchSouth);
+
+        Event room2SearchEast = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room2, "room2.search.east").build();
+        addEvent(room2, EVENT_AREA_EAST_SEARCH, room2SearchEast);
+
+        Event room2SearchNorth1 =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS_DELAY, room2, "room2.search.north.1").delay(1).build();
+        addEvent(room2, EVENT_AREA_NORTH_SEARCH, room2SearchNorth1);
+
+        Event room2SearchNorth2 =
+                eventBuilder(ACTION_MAKE_VISIBLE, TRIGGER_ONCE_DELAY, room2NorthDoor, "room2.search.north.2").delay(1)
+                        .build();
+        addEvent(room2, EVENT_AREA_NORTH_SEARCH, room2SearchNorth2);
+
+
+        // Room 2 Portal Encounter
+        Encounter room2WestPortal = buildEncounter(ENCOUNTER_ENVIRONMENT);
+
+        Event room2WestPortalJumpIn =
+                eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ALWAYS, room2, "room2.portal.jump.1", "room2.portal.jump.2")
+                        .memo("room2.portal.jump.choice").build();
+        addEvent(room2, EVENT_INTERACTION, room2WestPortalJumpIn);
+
+        Event room2WestPortalExplore =
+                eventBuilder(ACTION_EXPLORE, TRIGGER_ALWAYS, room2, "room2.portal.explore.1", "room2.portal.explore.2")
+                        .memo("room2.portal.explore.choice").build();
+        addEvent(room2, EVENT_INTERACTION, room2WestPortalExplore);
+
+        Event room2SearchWest1 =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE_DELAY, room2, "room2.search.west.1").delay(1).build();
+        addEvent(room2, EVENT_AREA_WEST_SEARCH, room2SearchWest1);
+
+        Event room2SearchWest2 =
+                eventBuilder(ACTION_ENCOUNTER, TRIGGER_ONCE_DELAY, room2, "room2.search.west.2").delay(2)
+                        .encounter(room2WestPortal).build();
+        addEvent(room2, EVENT_AREA_WEST_SEARCH, room2SearchWest2);
+
+
+        room2.installFeature(room2EastDoor, DIRECTION_EAST);
+        room2.installFeature(room1NorthDoor, DIRECTION_SOUTH);
+        room2.installFeature(room2NorthDoor, DIRECTION_NORTH);
+
+        Item key1 = itemBuilder(ITEM_KEY, "key1").targetFeature(room2EastDoor).build();
+        room1.addItem(key1);
+
+
+        // Room 3
+        Feature room3NorthDoor =
+                featureBuilder(FEATURE_DOOR, "room3.door.north").name("room3NorthDoor").exit(exit3).build();
+
+        Event room3NorthDoorSearch =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room3NorthDoor, "room3.door.north.search").build();
+        addEvent(room3NorthDoor, EVENT_FEATURE_SEARCH, room3NorthDoorSearch);
+
+        Event room3Enter = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room3, "room3.enter").build();
+        addEvent(room3, EVENT_AREA_ENTER, room3Enter);
+
+        Event room3Search = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room3, "room3.search").build();
+        addEvent(room3, EVENT_AREA_SEARCH, room3Search);
+
+        Event room3SearchWest = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room3, "room3.search.west").build();
+        addEvent(room3, EVENT_AREA_WEST_SEARCH, room3SearchWest);
+
+        Event room3SearchNorth = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room3, "room3.search.north").build();
+        addEvent(room3, EVENT_AREA_NORTH_SEARCH, room3SearchNorth);
+
+        room3.installFeature(room2EastDoor, DIRECTION_WEST);
+        room3.installFeature(room3NorthDoor, DIRECTION_NORTH);
+
+        Item key2 = itemBuilder(ITEM_KEY, "key2").targetFeature(room1Chest).build();
+        room3.addItem(key2);
+
+
+        // Room 4
+        Event room4Enter =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room4, "room4.enter.1", "room4.enter.2", "room4.enter.3")
+                        .build();
+        addEvent(room4, EVENT_AREA_ENTER, room4Enter);
+        addEvent(room4, EVENT_AREA_SEARCH, room4Enter);
+
+
+        // Room 5 merchant
+        // Prerequisite from room 6
+        Feature room6Monster = buildFeature(FEATURE_MONSTER, "room6.monster", "room6Monster");
+        add(room6Monster, VALUE, 9);
+        add(room6Monster, VISIBLE);
+
+        Item simpleDagger = itemBuilder(ITEM_WEAPON, "simple.dagger").targetFeature(room6Monster).build();
+        add(simpleDagger, VALUE, 3);
+
+        Item simpleSword = itemBuilder(ITEM_WEAPON, "simple.sword").targetFeature(room6Monster).build();
+        add(simpleSword, VALUE, 12);
+
+        Item simpleShield = itemBuilder(ITEM_WEAPON, "simple.shield").targetFeature(room6Monster).build();
+        add(simpleShield, VALUE, 8);
+
+        Encounter room5Merchant =
+                encounterBuilder(ENCOUNTER_MERCHANT).items(new Item[]{simpleDagger, simpleSword, simpleShield})
+                        .sellRate(.8).buyRate(1.2).build();
+
+        Event room5MerchantChat = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room5Merchant, "room5.merchant.chat")
+                .memo(messages.get("room5.merchant.chat.choice")).build();
+        addEvent(room5Merchant, EVENT_INTERACTION, room5MerchantChat);
+
+        Event room5MerchantGoodbye =
+                eventBuilder(ACTION_EXPLORE, TRIGGER_ALWAYS, room5Merchant, "room5.merchant.goodbye")
+                        .memo(messages.get("room5.merchant.goodbye.choice")).build();
+        addEvent(room5Merchant, EVENT_INTERACTION, room5MerchantGoodbye);
+
+        Event room5Enter =
+                eventBuilder(ACTION_ENCOUNTER, TRIGGER_ALWAYS, room5Merchant, "room5.enter").encounter(room5Merchant)
+                        .build();
+        addEvent(room5, EVENT_AREA_ENTER, room5Enter);
+
+
+        // Room 6
+        Event room6MonsterAttack =
+                eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ALWAYS_DELAY, room6Monster, "room6.monster.attack").delay(1)
                         .build();
 
-        Feature room7ChestWhite = entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room7ChestWhite")
-                .description("white chest").build();
+        Event room6Enter = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room6, "room6.enter").build();
+        addEvent(room6, EVENT_AREA_ENTER, room6Enter);
 
-        Feature room7ChestBlue = entityService.createFeatureBuilder().type(FEATURE_CHEST).name("room7ChestBlue")
-                .description("blue chest").build();
+        Event room6Enter2 = eventBuilder(ACTION_ADD_EVENT, TRIGGER_ONCE, room6)
+                .events(Collections.singletonList(room6MonsterAttack)).eventType(EVENT_EXPLORING).build();
+        addEvent(room6, EVENT_AREA_ENTER, room6Enter2);
 
-        Feature room7Table =
-                entityService.createFeatureBuilder().description("large granite pedestal").type(FEATURE_TABLE)
-                        .name("room7Table").build();
+        Event swordSuccess = eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ALWAYS, simpleSword, "simple.sword.success").build();
+        addEvent(simpleSword, EVENT_ATTACK_SUCCESS, swordSuccess);
 
-        Event room7Search =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS_DELAY)
-                        .entity(room7).responses("You see 3 chests aligned to the right and a pedestal with 3 keys.")
-                        .build();
+        Event swordSuccess2 = eventBuilder(ACTION_REMOVE_EVENT, TRIGGER_ONCE, room6)
+                .events(Collections.singletonList(room6MonsterAttack)).eventType(EVENT_EXPLORING).build();
+        addEvent(simpleSword, EVENT_ATTACK_SUCCESS, swordSuccess2);
+
+        room6.installFeature(room6Monster, null);
+
+
+        // Room 7
+        Feature room7ChestRed = buildFeature(FEATURE_CHEST, "room7.chest.red", "room7ChestRed");
+        room7.installFeature(room7ChestRed, null);
+        add(room7ChestRed, LOCKED);
+
+        Feature room7ChestWhite = buildFeature(FEATURE_CHEST, "room7.chest.white", "room7ChestWhite");
+        room7.installFeature(room7ChestWhite, null);
+        add(room7ChestWhite, LOCKED);
+
+        Feature room7ChestBlue = buildFeature(FEATURE_CHEST, "room7.chest.blue", "room7ChestBlue");
+        room7.installFeature(room7ChestBlue, null);
+        add(room7ChestBlue, LOCKED);
+
+        Feature room7Table = buildFeature(FEATURE_TABLE, "room7.table", "room7Table");
+        room7.installFeature(room7Table, null);
+
+        Event room7Enter = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room7, "room7.enter").build();
+        addEvent(room7, EVENT_AREA_ENTER, room7Enter);
+
+        Event room7Search = eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room7, "room7.search").build();
+        addEvent(room7, EVENT_AREA_SEARCH, room7Search);
+
         Event room7TableSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .entity(room7Table).responses("You see a round smooth 3 foot tall granite pedestal.").build();
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room7Table, "room7.table.search").build();
+        addEvent(room7Table, EVENT_FEATURE_SEARCH, room7TableSearch);
+
         Event room7ChestRedSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .entity(room7ChestRed).responses(
-                        "${room7ChestRed|open|An open|A closed} and ${room7ChestRed|locked} red chest on the floor.")
-                        .build();
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room7ChestRed, "room7.chest.red.search").build();
+        addEvent(room7ChestRed, EVENT_FEATURE_SEARCH, room7ChestRedSearch);
+
         Event room7ChestWhiteSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .entity(room7ChestWhite).responses(
-                        "${room7ChestWhite|open|An open|A closed} and ${room7ChestWhite|locked} white chest on the floor.")
-                        .build();
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room7ChestWhite, "room7.chest.white.search").build();
+        addEvent(room7ChestWhite, EVENT_FEATURE_SEARCH, room7ChestWhiteSearch);
+
         Event room7ChestBlueSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .entity(room7ChestBlue).responses(
-                        "${room7ChestBlue|open|An open|A closed} and ${room7ChestBlue|locked} blue chest on the floor.")
-                        .build();
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS, room7ChestBlue, "room7.chest.blue.search").build();
+        addEvent(room7ChestBlue, EVENT_FEATURE_SEARCH, room7ChestBlueSearch);
 
         Event room7ChestTrap2 =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ONCE_DELAY)
-                        .delay(2).entity(room7ChestRed)
-                        .responses("The poison courses through your veins, you feel weak.").build();
-        Event room7ChestTrap3 = entityService.createEventBuilder().actionType(ActionType.HORRIBLE_DEATH)
-                .triggerType(TriggerType.ONCE_DELAY).delay(4).entity(room7ChestRed)
-                .responses("The poison enters your brain, your body becomes paralyzed... you can't breath... you die.")
-                .build();
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE_DELAY, room7, "room7.poison.2").delay(2).build();
+        Event room7ChestTrap4 =
+                eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ONCE_DELAY, room7, "room7.poison.4").delay(4).build();
 
         List<Event> room7ChestTraps = new ArrayList<>();
         room7ChestTraps.add(room7ChestTrap2);
-        room7ChestTraps.add(room7ChestTrap3);
+        room7ChestTraps.add(room7ChestTrap4);
 
         Event room7ChestRedTrap1 =
-                entityService.createEventBuilder().actionType(ActionType.ADD_EVENT).triggerType(TriggerType.ONCE)
-                        .eventType(EXPLORING).events(room7ChestTraps).entity(room7ChestRed)
-                        .responses("You feel a small prick in your finger as you turn the key.").build();
+                eventBuilder(ACTION_ADD_EVENT, TRIGGER_ONCE, room7, "room7.chest.trap").events(room7ChestTraps)
+                        .eventType(EVENT_EXPLORING).build();
+        addEvent(room7ChestRed, EVENT_FEATURE_TRAP, room7ChestRedTrap1);
+
         Event room7ChestWhiteTrap1 =
-                entityService.createEventBuilder().actionType(ActionType.ADD_EVENT).triggerType(TriggerType.ONCE)
-                        .eventType(EXPLORING).events(room7ChestTraps).entity(room7ChestWhite)
-                        .responses("You feel a small prick in your finger as you turn the key.").build();
+                eventBuilder(ACTION_ADD_EVENT, TRIGGER_ONCE, room7, "room7.chest.trap").events(room7ChestTraps)
+                        .eventType(EVENT_EXPLORING).build();
+        addEvent(room7ChestWhite, EVENT_FEATURE_TRAP, room7ChestWhiteTrap1);
+
         Event room7ChestBlueTrap1 =
-                entityService.createEventBuilder().actionType(ActionType.ADD_EVENT).triggerType(TriggerType.ONCE)
-                        .eventType(EXPLORING).events(room7ChestTraps).entity(room7ChestBlue)
-                        .responses("You feel a small prick in your finger as you turn the key.").build();
+                eventBuilder(ACTION_ADD_EVENT, TRIGGER_ONCE, room7, "room7.chest.trap").events(room7ChestTraps)
+                        .eventType(EVENT_EXPLORING).build();
+        addEvent(room7ChestBlue, EVENT_FEATURE_TRAP, room7ChestBlueTrap1);
 
-        entityService.add(room7, AREA_SEARCH, room7Search);
-        entityService.add(room7, AREA_ENTER, room7Search);
-        entityService.add(room7Table, FEATURE_SEARCH, room7TableSearch);
-        entityService.add(room7ChestRed, FEATURE_SEARCH, room7ChestRedSearch);
-        entityService.add(room7ChestWhite, FEATURE_SEARCH, room7ChestWhiteSearch);
-        entityService.add(room7ChestBlue, FEATURE_SEARCH, room7ChestBlueSearch);
+        Event curePoison = eventBuilder(ACTION_REMOVE_EVENT, TRIGGER_ONCE, room7, "cure.poison.1", "cure.poison.2")
+                .events(room7ChestTraps).eventType(EVENT_EXPLORING).build();
 
-        entityService.add(room7ChestRed, FEATURE_TRAP, room7ChestRedTrap1);
-        entityService.add(room7ChestWhite, FEATURE_TRAP, room7ChestWhiteTrap1);
-        entityService.add(room7ChestBlue, FEATURE_TRAP, room7ChestBlueTrap1);
+        Item potionCurePoison = itemBuilder(ITEM_POTION, "potion.cure.poison").event(curePoison).build();
 
+        Item gem2 = buildItem(ITEM_GEM, "gem2");
+        add(gem2, VALUE, 20);
 
-        Event room2SearchNorth2 = entityService.createEventBuilder().actionType(ActionType.MAKE_VISIBLE)
-                .triggerType(TriggerType.ONCE_DELAY).entity(room2NorthDoor).delay(1)
-                .responses("A door suddenly appears.").build();
-
-        entityService.add(room2, AREA_NORTH_SEARCH, room2SearchNorth1);
-        entityService.add(room2, AREA_NORTH_SEARCH, room2SearchNorth2);
-
-
-        Event room1ChestSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("an old and dusty ${room1Chest|open|open|closed} chest").entity(room1Chest).build();
-        entityService.add(room1Chest, FEATURE_SEARCH, room1ChestSearch);
-
-        Event room2EastDoorSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("You see ${room2EastDoor|open} iron door").entity(room2EastDoor).build();
-        entityService.add(room2EastDoor, FEATURE_SEARCH, room2EastDoorSearch);
-
-        Event room2SouthDoorSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("You see ${room2SouthDoor|open} old wooden oak door.").entity(room2SouthDoor)
-                        .build();
-        entityService.add(room2SouthDoor, FEATURE_SEARCH, room2SouthDoorSearch);
-
-        Event room3NorthDoorSearch =
-                entityService.createEventBuilder().actionType(ActionType.DESCRIBE).triggerType(TriggerType.ALWAYS)
-                        .responses("${room3NorthDoor|open|An open|A closed} dark and dusty curtain")
-                        .entity(room3NorthDoor).build();
-        entityService.add(room3NorthDoor, FEATURE_SEARCH, room3NorthDoorSearch);
-
-
-        EntityFacade room1ChestLock = entityFacadeBuilderFactory.builder().entity(room1Chest).attribute(LOCKED).build();
-        EntityFacade room2EastDoorLock =
-                entityFacadeBuilderFactory.builder().entity(room2EastDoor).attribute(LOCKED).build();
-
-        EntityUtil.add(room1ChestLock);
-        EntityUtil.add(room2EastDoorLock);
-
-        room1.installFeature(room1Chest, null);
-        room1.installFeature(room2SouthDoor, DIRECTION_NORTH);
-        room2.installFeature(room2EastDoor, DIRECTION_EAST);
-        room2.installFeature(room2SouthDoor, DIRECTION_SOUTH);
-        room2.installFeature(room2NorthDoor, DIRECTION_NORTH);
-        room3.installFeature(room2EastDoor, DIRECTION_WEST);
-        room3.installFeature(room3NorthDoor, DIRECTION_NORTH);
-        room6.installFeature(room6Monster, null);
-        room7.installFeature(room7Table, null);
-        room7.installFeature(room7ChestBlue, null);
-        room7.installFeature(room7ChestRed, null);
-        room7.installFeature(room7ChestWhite, null);
-
-
-        // Items.
-        Item key1 = entityService.createItemBuilder().type(ITEM_KEY).name("key1").description("shiny blue key")
-                .targetFeature(room2EastDoor).build();
-        Item key2 = entityService.createItemBuilder().type(ITEM_KEY).name("key2").description("dull iron key")
-                .targetFeature(room1Chest).build();
-        Item gem1 =
-                entityService.createItemBuilder().type(ITEM_GEM).name("gem1").description("sparkling red ruby").build();
-        Item gem2 = entityService.createItemBuilder().type(ITEM_GEM).name("gem2").description("bright shiny diamond")
-                .build();
-        Item potion1 =
-                entityService.createItemBuilder().type(ITEM_POTION).name("potion1").description("cure poison potion")
-                        .build();
-        Item keyGold = entityService.createItemBuilder().type(ITEM_KEY).name("keyGold").description("gold key")
-                .targetFeature(room7ChestBlue).build();
-        Item keySilver = entityService.createItemBuilder().type(ITEM_KEY).name("keySilver").description("silver key")
-                .targetFeature(room7ChestRed).build();
-        Item keyBronze = entityService.createItemBuilder().type(ITEM_KEY).name("keyBronze").description("bronze key")
-                .targetFeature(room7ChestWhite).build();
-
-        entityService.add(gem1, VALUE, 5);
-        entityService.add(gem2, VALUE, 20);
-
-        room1Chest.addItem(gem1);
-        room1.addItem(key1);
-        room3.addItem(key2);
-
-        entityService.add(keyGold, VISIBLE);
-        entityService.add(keySilver, VISIBLE);
-        entityService.add(keyBronze, VISIBLE);
+        Item keyGold = itemBuilder(ITEM_KEY, "key.gold").targetFeature(room7ChestBlue).build();
+        Item keySilver = itemBuilder(ITEM_KEY, "key.silver").targetFeature(room7ChestRed).build();
+        Item keyBronze = itemBuilder(ITEM_KEY, "key.bronze").targetFeature(room7ChestWhite).build();
 
         room7Table.addItem(keyGold);
         room7Table.addItem(keySilver);
         room7Table.addItem(keyBronze);
 
-
-        room7ChestWhite.addItem(potion1);
+        room7ChestWhite.addItem(potionCurePoison);
         room7ChestRed.addItem(gem2);
 
-
-        entityService.add(room7ChestBlue, LOCKED);
-        entityService.add(room7ChestRed, LOCKED);
-        entityService.add(room7ChestWhite, LOCKED);
-
-        // Summary
-        entityService.addArea(room1);
-        entityService.addArea(room2);
-        entityService.addArea(room3);
-        entityService.addArea(room4);
-        entityService.addArea(room5);
-        entityService.addArea(room6);
-        entityService.addArea(room7);
+        room7.installFeature(room2NorthDoor, DIRECTION_SOUTH);
 
         LOGGER.info("...complete.");
     }
