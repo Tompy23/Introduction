@@ -116,14 +116,14 @@ public class Introduction extends AdventureImpl implements Adventure {
         Encounter room2WestPortal = buildEncounter(ENCOUNTER_ENVIRONMENT);
 
         Event room2WestPortalJumpIn =
-                eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ALWAYS, room2, "room2.portal.jump.1", "room2.portal.jump.2")
-                        .memo("room2.portal.jump.choice").build();
-        addEvent(room2, EVENT_INTERACTION, room2WestPortalJumpIn);
+                eventBuilder(ACTION_END_ADVENTURE, TRIGGER_ALWAYS, room2, "room2.portal.jump.1", "room2.portal.jump.2")
+                        .memo(messages.get("room2.portal.jump.choice")).build();
+        addEvent(room2WestPortal, EVENT_INTERACTION, room2WestPortalJumpIn);
 
         Event room2WestPortalExplore =
                 eventBuilder(ACTION_EXPLORE, TRIGGER_ALWAYS, room2, "room2.portal.explore.1", "room2.portal.explore.2")
-                        .memo("room2.portal.explore.choice").build();
-        addEvent(room2, EVENT_INTERACTION, room2WestPortalExplore);
+                        .memo(messages.get("room2.portal.explore.choice")).build();
+        addEvent(room2WestPortal, EVENT_INTERACTION, room2WestPortalExplore);
 
         Event room2SearchWest1 =
                 eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE_DELAY, room2, "room2.search.west.1").delay(1).build();
@@ -140,6 +140,7 @@ public class Introduction extends AdventureImpl implements Adventure {
         room2.installFeature(room2NorthDoor, DIRECTION_NORTH);
 
         Item key1 = itemBuilder(ITEM_KEY, "key1").targetFeature(room2EastDoor).build();
+        add(key1, VISIBLE);
         room1.addItem(key1);
 
 
@@ -157,6 +158,7 @@ public class Introduction extends AdventureImpl implements Adventure {
         room3.installFeature(room3NorthDoor, DIRECTION_NORTH);
 
         Item key2 = itemBuilder(ITEM_KEY, "key2").targetFeature(room1Chest).build();
+        add(key2, VISIBLE);
         room3.addItem(key2);
 
 
@@ -200,7 +202,7 @@ public class Introduction extends AdventureImpl implements Adventure {
 
         // Room 6
         Event room6MonsterAttack =
-                eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ALWAYS_DELAY, room6Monster, "room6.monster.attack").delay(1)
+                eventBuilder(ACTION_END_ADVENTURE, TRIGGER_ALWAYS_DELAY, room6Monster, "room6.monster.attack").delay(1)
                         .build();
 
         describeAlways(room6, EVENT_AREA_ENTER, "room6.enter");
@@ -209,7 +211,7 @@ public class Introduction extends AdventureImpl implements Adventure {
                 .events(Collections.singletonList(room6MonsterAttack)).eventType(EVENT_EXPLORING).build();
         addEvent(room6, EVENT_AREA_ENTER, room6Enter2);
 
-        Event swordSuccess = eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ALWAYS, simpleSword, "simple.sword.success").build();
+        Event swordSuccess = eventBuilder(ACTION_END_ADVENTURE, TRIGGER_ALWAYS, simpleSword, "simple.sword.success").build();
         addEvent(simpleSword, EVENT_WEAPON_ATTACK_SUCCESS, swordSuccess);
 
         Event swordSuccess2 = eventBuilder(ACTION_REMOVE_EVENT, TRIGGER_ONCE, room6)
@@ -245,7 +247,7 @@ public class Introduction extends AdventureImpl implements Adventure {
         Event room7ChestTrap2 =
                 eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE_DELAY, room7, "room7.poison.2").delay(2).build();
         Event room7ChestTrap4 =
-                eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ONCE_DELAY, room7, "room7.poison.4").delay(4).build();
+                eventBuilder(ACTION_END_ADVENTURE, TRIGGER_ONCE_DELAY, room7, "room7.poison.4").delay(4).build();
 
         List<Event> room7ChestTraps = new ArrayList<>();
         room7ChestTraps.add(room7ChestTrap2);

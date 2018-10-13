@@ -47,13 +47,13 @@ public class App {
         LOGGER.info("Player [{}] enters the adventure", player.getName());
 
         outStream.println(
-                String.format("%s, you are about to enter a world of adventure... you find yourself in an area...",
+                String.format("%s, you are about to enter a world of adventure... you find yourself in a room...",
                         player.getName()));
         outStream.println("You have been tasked with defeating the orc to the north.");
         outStream.println(
                 "You will find him in a cave.  First, you must acquire the necessary weapon to defeat the nasty orc and then venture into the cave and kill it.");
         outStream.println(
-                "You are in a small room, which you have just entered from the south.  You cannot return... you much complete your quest.");
+                "You are in a small room, which you have just entered from the south.  You cannot return... you must complete your quest.");
 
         adventure.create(stateFactory);
 
