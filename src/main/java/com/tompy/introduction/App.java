@@ -1,19 +1,19 @@
 package com.tompy.introduction;
 
 
-import com.tompy.adventure.api.Adventure;
-import com.tompy.attribute.internal.AttributeManagerFactoryImpl;
-import com.tompy.entity.api.EntityService;
-import com.tompy.entity.event.internal.EventManagerFactoryImpl;
-import com.tompy.entity.internal.EntityFacadeBuilderFactoryImpl;
-import com.tompy.entity.internal.EntityServiceImpl;
-import com.tompy.exit.internal.ExitBuilderFactoryImpl;
+import com.tompy.adventure.Adventure;
+import com.tompy.attribute.AttributeManagerFactoryImpl;
+import com.tompy.entity.EntityService;
+import com.tompy.entity.event.EventManagerFactoryImpl;
+import com.tompy.entity.EntityFacadeBuilderFactoryImpl;
+import com.tompy.entity.EntityServiceImpl;
+import com.tompy.exit.ExitBuilderFactoryImpl;
 import com.tompy.io.UserInput;
 import com.tompy.io.UserInputTextImpl;
-import com.tompy.player.api.Player;
-import com.tompy.player.internal.PlayerImpl;
-import com.tompy.state.api.AdventureStateFactory;
-import com.tompy.state.internal.AdventureStateFactoryImpl;
+import com.tompy.player.Player;
+import com.tompy.player.PlayerImpl;
+import com.tompy.state.AdventureStateFactory;
+import com.tompy.state.AdventureStateFactoryImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -1,19 +1,19 @@
 package com.tompy.introduction;
 
-import com.tompy.adventure.api.Adventure;
-import com.tompy.adventure.internal.AdventureImpl;
-import com.tompy.entity.api.EntityFacadeBuilderFactory;
-import com.tompy.entity.api.EntityService;
-import com.tompy.entity.area.api.Area;
-import com.tompy.entity.encounter.api.Encounter;
-import com.tompy.entity.event.api.Event;
-import com.tompy.entity.feature.api.Feature;
-import com.tompy.entity.item.api.Item;
-import com.tompy.exit.api.Exit;
-import com.tompy.exit.api.ExitBuilderFactory;
+import com.tompy.adventure.Adventure;
+import com.tompy.adventure.AdventureImpl;
+import com.tompy.entity.EntityFacadeBuilderFactory;
+import com.tompy.entity.EntityService;
+import com.tompy.entity.area.Area;
+import com.tompy.entity.encounter.Encounter;
+import com.tompy.entity.event.Event;
+import com.tompy.entity.feature.Feature;
+import com.tompy.entity.item.Item;
+import com.tompy.exit.Exit;
+import com.tompy.exit.ExitBuilderFactory;
 import com.tompy.io.UserInput;
-import com.tompy.player.api.Player;
-import com.tompy.state.api.AdventureStateFactory;
+import com.tompy.player.Player;
+import com.tompy.state.AdventureStateFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.tompy.attribute.api.Attribute.*;
+import static com.tompy.attribute.Attribute.*;
 import static com.tompy.directive.ActionType.*;
 import static com.tompy.directive.Direction.*;
 import static com.tompy.directive.EncounterType.ENCOUNTER_ENVIRONMENT;
@@ -170,7 +170,6 @@ public class Introduction extends AdventureImpl implements Adventure {
         // Prerequisite from room 6
         Feature room6Monster = buildFeature(FEATURE_MONSTER, "room6.monster", "room6Monster");
         add(room6Monster, VALUE, 9);
-        add(room6Monster, VISIBLE);
 
         Item simpleDagger = itemBuilder(ITEM_WEAPON, "simple.dagger").targetFeature(room6Monster).build();
         add(simpleDagger, VALUE, 3);
