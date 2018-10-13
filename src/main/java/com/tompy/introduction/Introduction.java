@@ -210,11 +210,11 @@ public class Introduction extends AdventureImpl implements Adventure {
         addEvent(room6, EVENT_AREA_ENTER, room6Enter2);
 
         Event swordSuccess = eventBuilder(ACTION_HORRIBLE_DEATH, TRIGGER_ALWAYS, simpleSword, "simple.sword.success").build();
-        addEvent(simpleSword, EVENT_ATTACK_SUCCESS, swordSuccess);
+        addEvent(simpleSword, EVENT_WEAPON_ATTACK_SUCCESS, swordSuccess);
 
         Event swordSuccess2 = eventBuilder(ACTION_REMOVE_EVENT, TRIGGER_ONCE, room6)
                 .events(Collections.singletonList(room6MonsterAttack)).eventType(EVENT_EXPLORING).build();
-        addEvent(simpleSword, EVENT_ATTACK_SUCCESS, swordSuccess2);
+        addEvent(simpleSword, EVENT_WEAPON_ATTACK_SUCCESS, swordSuccess2);
 
         room6.installFeature(room6Monster, null);
 
