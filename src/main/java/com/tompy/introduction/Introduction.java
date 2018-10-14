@@ -13,7 +13,6 @@ import com.tompy.exit.Exit;
 import com.tompy.exit.ExitBuilderFactory;
 import com.tompy.io.UserInput;
 import com.tompy.player.Player;
-import com.tompy.state.AdventureStateFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,9 +41,9 @@ public class Introduction extends AdventureImpl implements Adventure {
     }
 
     @Override
-    public void create(AdventureStateFactory stateFactory) {
+    public void create() {
+        setThisAdventure(this);
         LOGGER.info("Creating adventure...");
-        this.stateFactory = stateFactory;
 
         // First map out the adventure with areas and exits
         // Areas
@@ -71,13 +70,24 @@ public class Introduction extends AdventureImpl implements Adventure {
         add(room1Chest, LOCKED);
 
         describeAlways(room1Chest, EVENT_FEATURE_SEARCH, "room1.chest.search");
+        Event room1ChestOpen1 =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS_DELAY, room1Chest, "room1.chest.open.2").delay(1).build();
+        Event room1ChestOpen2 = eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE, room1Chest, "room1.chest.open.1").build();
+        addEvent(room1Chest, EVENT_FEATURE_OPEN, room1ChestOpen1);
+        addEvent(room1Chest, EVENT_FEATURE_OPEN, room1ChestOpen2);
+        describeAlways(room1Chest, EVENT_FEATURE_CLOSE, "room1.chest.close");
+        describeAlways(room1Chest, EVENT_FEATURE_OPEN_BUT_LOCKED, "room1.chest.open.locked");
 
         Feature room1NorthDoor =
                 featureBuilder(FEATURE_DOOR, "room1.door.north").name("room1NorthDoor").exit(exit1).build();
 
         describeAlways(room1NorthDoor, EVENT_FEATURE_SEARCH, "room1.door.north.search");
+        describeAlways(room1NorthDoor, EVENT_FEATURE_OPEN, "room1.door.north.open");
+        describeAlways(room1NorthDoor, EVENT_FEATURE_CLOSE, "room1.door.north.close");
         describeAlways(room1, EVENT_AREA_ENTER, "room1.enter");
+        describeAlways(room1, EVENT_AREA_ENTER_SOUTH, "room1.enter.south");
         describeAlways(room1, EVENT_AREA_SEARCH, "room1.search");
+        describeAlways(room1, EVENT_AREA_SOUTH_SEARCH, "room1.search.south");
 
         room1.installFeature(room1Chest, null);
         room1.installFeature(room1NorthDoor, DIRECTION_NORTH);
@@ -92,25 +102,38 @@ public class Introduction extends AdventureImpl implements Adventure {
                 featureBuilder(FEATURE_DOOR, "room2.door.north").name("room2NorthDoor").exit(exit6).build();
         remove(room2NorthDoor, VISIBLE);
 
+        Event room2NorthDoorOpen1 =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE, room2NorthDoor, "room2.door.north.open.1").build();
+        addEvent(room2NorthDoor, EVENT_FEATURE_OPEN, room2NorthDoorOpen1);
+        Event room2NorthDoorOpen2 =
+                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS_DELAY, room2NorthDoor, "room2.door.north.open.2").delay(1)
+                        .build();
+        addEvent(room2NorthDoor, EVENT_FEATURE_OPEN, room2NorthDoorOpen2);
+
         Feature room2EastDoor =
                 featureBuilder(FEATURE_DOOR, "room2.door.east").name("room2EastDoor").exit(exit2).build();
         add(room2EastDoor, LOCKED);
 
+        describeAlways(room2EastDoor, EVENT_FEATURE_OPEN, "room2.door.east.open");
+        describeAlways(room2EastDoor, EVENT_FEATURE_OPEN_BUT_LOCKED, "room2.door.east.open.locked");
+
         describeAlways(room2, EVENT_AREA_ENTER, "room2.enter");
+        describeAlways(room2, EVENT_AREA_ENTER_SOUTH, "room2.enter.south");
+        describeAlways(room2, EVENT_AREA_ENTER_EAST, "room2.enter.east");
         describeAlways(room2, EVENT_AREA_SEARCH, "room2.search");
         describeAlways(room2, EVENT_AREA_SOUTH_SEARCH, "room2.search.south");
         describeAlways(room2, EVENT_AREA_EAST_SEARCH, "room2.search.east");
         describeAlways(room2EastDoor, EVENT_FEATURE_SEARCH, "room2.door.east.search");
 
-        Event room2SearchNorth1 =
-                eventBuilder(ACTION_DESCRIBE, TRIGGER_ALWAYS_DELAY, room2, "room2.search.north.1").delay(1).build();
-        addEvent(room2, EVENT_AREA_NORTH_SEARCH, room2SearchNorth1);
-
+        describeAlways(room2, EVENT_AREA_NORTH_SEARCH, "room2.search.north.1");
         Event room2SearchNorth2 =
                 eventBuilder(ACTION_MAKE_VISIBLE, TRIGGER_ONCE_DELAY, room2NorthDoor, "room2.search.north.2").delay(1)
                         .build();
         addEvent(room2, EVENT_AREA_NORTH_SEARCH, room2SearchNorth2);
-
+        Event room2SearchNorth3 =
+                eventBuilder(ACTION_MAKE_VISIBLE, TRIGGER_ALWAYS_DELAY, room2NorthDoor, "room2.search.north.3").delay(2)
+                        .build();
+        addEvent(room2, EVENT_AREA_NORTH_SEARCH, room2SearchNorth3);
 
         // Room 2 Portal Encounter
         Encounter room2WestPortal = buildEncounter(ENCOUNTER_ENVIRONMENT);
@@ -125,20 +148,20 @@ public class Introduction extends AdventureImpl implements Adventure {
                         .memo(messages.get("room2.portal.explore.choice")).build();
         addEvent(room2WestPortal, EVENT_INTERACTION, room2WestPortalExplore);
 
+        describeAlways(room2, EVENT_AREA_WEST_SEARCH, "room2.search.west.0");
         Event room2SearchWest1 =
                 eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE_DELAY, room2, "room2.search.west.1").delay(1).build();
         addEvent(room2, EVENT_AREA_WEST_SEARCH, room2SearchWest1);
-
         Event room2SearchWest2 =
                 eventBuilder(ACTION_ENCOUNTER, TRIGGER_ONCE_DELAY, room2, "room2.search.west.2").delay(2)
                         .encounter(room2WestPortal).build();
         addEvent(room2, EVENT_AREA_WEST_SEARCH, room2SearchWest2);
 
-
         room2.installFeature(room2EastDoor, DIRECTION_EAST);
         room2.installFeature(room1NorthDoor, DIRECTION_SOUTH);
         room2.installFeature(room2NorthDoor, DIRECTION_NORTH);
 
+        // Key for east door is in room 1
         Item key1 = itemBuilder(ITEM_KEY, "key1").targetFeature(room2EastDoor).build();
         add(key1, VISIBLE);
         room1.addItem(key1);
@@ -153,6 +176,8 @@ public class Introduction extends AdventureImpl implements Adventure {
         describeAlways(room3, EVENT_AREA_SEARCH, "room3.search");
         describeAlways(room3, EVENT_AREA_WEST_SEARCH, "room3.search.west");
         describeAlways(room3, EVENT_AREA_NORTH_SEARCH, "room3.search.north");
+        describeAlways(room3NorthDoor, EVENT_FEATURE_OPEN, "room3.door.north.open");
+        describeAlways(room3NorthDoor, EVENT_FEATURE_CLOSE, "room3.door.north.close");
 
         room3.installFeature(room2EastDoor, DIRECTION_WEST);
         room3.installFeature(room3NorthDoor, DIRECTION_NORTH);
@@ -165,6 +190,7 @@ public class Introduction extends AdventureImpl implements Adventure {
         // Room 4
         describeAlways(room4, EVENT_AREA_ENTER, "room4.enter.1", "room4.enter.2", "room4.enter.3");
         describeAlways(room4, EVENT_AREA_SEARCH, "room4.enter.1", "room4.enter.2", "room4.enter.3");
+        describeAlways(room4, EVENT_AREA_ENTER_WEST, "room4.enter.west");
 
         // Room 5 merchant
         // Prerequisite from room 6
@@ -193,6 +219,11 @@ public class Introduction extends AdventureImpl implements Adventure {
                         .memo(messages.get("room5.merchant.goodbye.choice")).build();
         addEvent(room5Merchant, EVENT_INTERACTION, room5MerchantGoodbye);
 
+        Event room5MerchantEncounterEnd =
+                eventBuilder(ACTION_SEND_TO_AREA, TRIGGER_ALWAYS, room5Merchant, "room5.merchant.end").area(room4)
+                        .direction(DIRECTION_WEST).build();
+        addEvent(room5Merchant, EVENT_ENCOUNTER_END, room5MerchantEncounterEnd);
+
         Event room5Enter =
                 eventBuilder(ACTION_ENCOUNTER, TRIGGER_ALWAYS, room5Merchant, "room5.enter").encounter(room5Merchant)
                         .build();
@@ -206,11 +237,15 @@ public class Introduction extends AdventureImpl implements Adventure {
 
         describeAlways(room6, EVENT_AREA_ENTER, "room6.enter");
 
+        Event room6ExitSouth = eventBuilder(ACTION_END_ADVENTURE, TRIGGER_ALWAYS, room6, "room6.exit.south").build();
+        addEvent(room6, EVENT_AREA_EXIT_SOUTH, room6ExitSouth);
+
         Event room6Enter2 = eventBuilder(ACTION_ADD_EVENT, TRIGGER_ONCE, room6)
                 .events(Collections.singletonList(room6MonsterAttack)).eventType(EVENT_EXPLORING).build();
         addEvent(room6, EVENT_AREA_ENTER, room6Enter2);
 
-        Event swordSuccess = eventBuilder(ACTION_END_ADVENTURE, TRIGGER_ALWAYS, simpleSword, "simple.sword.success").build();
+        Event swordSuccess =
+                eventBuilder(ACTION_END_ADVENTURE, TRIGGER_ALWAYS, simpleSword, "simple.sword.success").build();
         addEvent(simpleSword, EVENT_WEAPON_ATTACK_SUCCESS, swordSuccess);
 
         Event swordSuccess2 = eventBuilder(ACTION_REMOVE_EVENT, TRIGGER_ONCE, room6)
@@ -242,6 +277,12 @@ public class Introduction extends AdventureImpl implements Adventure {
         describeAlways(room7ChestRed, EVENT_FEATURE_SEARCH, "room7.chest.red.search");
         describeAlways(room7ChestWhite, EVENT_FEATURE_SEARCH, "room7.chest.white.search");
         describeAlways(room7ChestBlue, EVENT_FEATURE_SEARCH, "room7.chest.blue.search");
+        describeAlways(room7ChestRed, EVENT_FEATURE_UNLOCK, "room7.chest.unlock");
+        describeAlways(room7ChestRed, EVENT_FEATURE_OPEN, "room7.chest.open");
+        describeAlways(room7ChestWhite, EVENT_FEATURE_UNLOCK, "room7.chest.unlock");
+        describeAlways(room7ChestWhite, EVENT_FEATURE_OPEN, "room7.chest.open");
+        describeAlways(room7ChestBlue, EVENT_FEATURE_UNLOCK, "room7.chest.unlock");
+        describeAlways(room7ChestBlue, EVENT_FEATURE_OPEN, "room7.chest.open");
 
         Event room7ChestTrap2 =
                 eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE_DELAY, room7, "room7.poison.2").delay(2).build();

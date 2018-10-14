@@ -3,10 +3,10 @@ package com.tompy.introduction;
 
 import com.tompy.adventure.Adventure;
 import com.tompy.attribute.AttributeManagerFactoryImpl;
-import com.tompy.entity.EntityService;
-import com.tompy.entity.event.EventManagerFactoryImpl;
 import com.tompy.entity.EntityFacadeBuilderFactoryImpl;
+import com.tompy.entity.EntityService;
 import com.tompy.entity.EntityServiceImpl;
+import com.tompy.entity.event.EventManagerFactoryImpl;
 import com.tompy.exit.ExitBuilderFactoryImpl;
 import com.tompy.io.UserInput;
 import com.tompy.io.UserInputTextImpl;
@@ -19,6 +19,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+
+import static com.tompy.directive.Direction.DIRECTION_SOUTH;
 
 /**
  * Hello world!
@@ -38,6 +40,7 @@ public class App {
                 new EntityServiceImpl(new AttributeManagerFactoryImpl(), new EventManagerFactoryImpl());
         UserInput ui = new UserInputTextImpl(inStream, outStream, entityService);
         Player player = new PlayerImpl(ui.getResponse("Player name?"), null);
+        outStream.println();
         Adventure adventure = new Introduction(player, entityService, new EntityFacadeBuilderFactoryImpl(entityService),
                 new ExitBuilderFactoryImpl(), ui, outStream);
 
@@ -46,18 +49,13 @@ public class App {
 
         LOGGER.info("Player [{}] enters the adventure", player.getName());
 
-        outStream.println(
-                String.format("%s, you are about to enter a world of adventure... you find yourself in a room...",
-                        player.getName()));
-        outStream.println("You have been tasked with defeating the orc to the north.");
-        outStream.println(
-                "You will find him in a cave.  First, you must acquire the necessary weapon to defeat the nasty orc and then venture into the cave and kill it.");
-        outStream.println(
-                "You are in a small room, which you have just entered from the south.  You cannot return... you must complete your quest.");
+        outStream.println(String.format("%s, you are about to enter a world of adventure... ", player.getName()));
+        outStream.println("Your quest is to defeat a nasty orc to the north.");
+        outStream.println();
 
-        adventure.create(stateFactory);
+        adventure.create();
 
-        adventure.start(stateFactory.getExploreState(), "StartRoom");
+        adventure.start(stateFactory.getExploreState(), "StartRoom", DIRECTION_SOUTH);
 
         outStream.println(String.format("%s has left the adventure.", player.getName()));
 
