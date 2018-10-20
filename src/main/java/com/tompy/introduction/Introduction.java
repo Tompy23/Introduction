@@ -56,12 +56,12 @@ public class Introduction extends AdventureImpl implements Adventure {
         Area room7 = buildArea("room7");
 
         // Exits
-        Exit exit1 = buildExit(room1, DIRECTION_NORTH, room2, DIRECTION_SOUTH, false);
-        Exit exit2 = buildExit(room2, DIRECTION_EAST, room3, DIRECTION_WEST, false);
-        Exit exit3 = buildExit(room3, DIRECTION_NORTH, room4, DIRECTION_SOUTH, false);
-        Exit exit4 = buildExit(room4, DIRECTION_EAST, room5, DIRECTION_WEST, true);
-        Exit exit5 = buildExit(room4, DIRECTION_NORTH, room6, DIRECTION_SOUTH, true);
-        Exit exit6 = buildExit(room2, DIRECTION_NORTH, room7, DIRECTION_SOUTH, false);
+        Exit exit1 = buildExit(room1, DIRECTION_NORTH, room2, DIRECTION_SOUTH, false, 1);
+        Exit exit2 = buildExit(room2, DIRECTION_EAST, room3, DIRECTION_WEST, false, 1);
+        Exit exit3 = buildExit(room3, DIRECTION_NORTH, room4, DIRECTION_SOUTH, false, 1);
+        Exit exit4 = buildExit(room4, DIRECTION_EAST, room5, DIRECTION_WEST, true, 1);
+        Exit exit5 = buildExit(room4, DIRECTION_NORTH, room6, DIRECTION_SOUTH, true, 1);
+        Exit exit6 = buildExit(room2, DIRECTION_NORTH, room7, DIRECTION_SOUTH, false, 1);
 
 
         // Detail each area
@@ -162,7 +162,7 @@ public class Introduction extends AdventureImpl implements Adventure {
         room2.installFeature(room2NorthDoor, DIRECTION_NORTH);
 
         // Key for east door is in room 1
-        Item key1 = itemBuilder(ITEM_KEY, "key1").targetFeature(room2EastDoor).build();
+        Item key1 = itemBuilder(ITEM_KEY, "key1").targetFeature(room2EastDoor).manipulationTicks(1).build();
         add(key1, VISIBLE);
         room1.addItem(key1);
 
@@ -182,7 +182,7 @@ public class Introduction extends AdventureImpl implements Adventure {
         room3.installFeature(room2EastDoor, DIRECTION_WEST);
         room3.installFeature(room3NorthDoor, DIRECTION_NORTH);
 
-        Item key2 = itemBuilder(ITEM_KEY, "key2").targetFeature(room1Chest).build();
+        Item key2 = itemBuilder(ITEM_KEY, "key2").targetFeature(room1Chest).manipulationTicks(1).build();
         add(key2, VISIBLE);
         room3.addItem(key2);
 
@@ -197,10 +197,12 @@ public class Introduction extends AdventureImpl implements Adventure {
         Feature room6Monster = buildFeature(FEATURE_MONSTER, "room6.monster", "room6Monster");
         add(room6Monster, VALUE, 9);
 
-        Item simpleDagger = itemBuilder(ITEM_WEAPON, "simple.dagger").targetFeature(room6Monster).build();
+        Item simpleDagger =
+                itemBuilder(ITEM_WEAPON, "simple.dagger").targetFeature(room6Monster).manipulationTicks(1).build();
         add(simpleDagger, VALUE, 3);
 
-        Item simpleSword = itemBuilder(ITEM_WEAPON, "simple.sword").targetFeature(room6Monster).build();
+        Item simpleSword =
+                itemBuilder(ITEM_WEAPON, "simple.sword").targetFeature(room6Monster).manipulationTicks(1).build();
         add(simpleSword, VALUE, 12);
 
         Item simpleShield = itemBuilder(ITEM_WEAPON, "simple.shield").targetFeature(room6Monster).build();
@@ -311,14 +313,16 @@ public class Introduction extends AdventureImpl implements Adventure {
         Event curePoison = eventBuilder(ACTION_REMOVE_EVENT, TRIGGER_ONCE, room7, "cure.poison.1", "cure.poison.2")
                 .events(room7ChestTraps).eventType(EVENT_EXPLORING).build();
 
-        Item potionCurePoison = itemBuilder(ITEM_POTION, "potion.cure.poison").event(curePoison).build();
+        Item potionCurePoison =
+                itemBuilder(ITEM_POTION, "potion.cure.poison").event(curePoison).manipulationTicks(2).build();
 
         Item gem2 = buildItem(ITEM_GEM, "gem2");
         add(gem2, VALUE, 20);
 
-        Item keyGold = itemBuilder(ITEM_KEY, "key.gold").targetFeature(room7ChestBlue).build();
-        Item keySilver = itemBuilder(ITEM_KEY, "key.silver").targetFeature(room7ChestRed).build();
-        Item keyBronze = itemBuilder(ITEM_KEY, "key.bronze").targetFeature(room7ChestWhite).build();
+        Item keyGold = itemBuilder(ITEM_KEY, "key.gold").targetFeature(room7ChestBlue).manipulationTicks(1).build();
+        Item keySilver = itemBuilder(ITEM_KEY, "key.silver").targetFeature(room7ChestRed).manipulationTicks(1).build();
+        Item keyBronze =
+                itemBuilder(ITEM_KEY, "key.bronze").targetFeature(room7ChestWhite).manipulationTicks(1).build();
 
         room7Table.addItem(keyGold);
         room7Table.addItem(keySilver);
