@@ -2,6 +2,8 @@ package com.tompy.introduction;
 
 import com.tompy.adventure.Adventure;
 import com.tompy.adventure.AdventureImpl;
+import com.tompy.common.Coordinates;
+import com.tompy.common.Coordinates2DImpl;
 import com.tompy.entity.EntityFacadeBuilderFactory;
 import com.tompy.entity.EntityService;
 import com.tompy.entity.area.Area;
@@ -47,13 +49,14 @@ public class Introduction extends AdventureImpl implements Adventure {
 
         // First map out the adventure with areas and exits
         // Areas
-        Area room1 = buildArea("StartRoom");
-        Area room2 = buildArea("room2");
-        Area room3 = buildArea("room3");
-        Area room4 = buildArea("room4");
-        Area room5 = buildArea("room5");
-        Area room6 = buildArea("room6");
-        Area room7 = buildArea("room7");
+        Coordinates coordinates = new Coordinates2DImpl(0, 0);
+        Area room1 = buildArea("StartRoom", coordinates);
+        Area room2 = buildArea("room2", coordinates);
+        Area room3 = buildArea("room3", coordinates);
+        Area room4 = buildArea("room4", coordinates);
+        Area room5 = buildArea("room5", coordinates);
+        Area room6 = buildArea("room6", coordinates);
+        Area room7 = buildArea("room7", coordinates);
 
         // Exits
         Exit exit1 = buildExit(room1, DIRECTION_NORTH, room2, DIRECTION_SOUTH, false, 1);

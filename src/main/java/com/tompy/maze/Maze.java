@@ -2,6 +2,8 @@ package com.tompy.maze;
 
 import com.tompy.adventure.Adventure;
 import com.tompy.adventure.AdventureImpl;
+import com.tompy.common.Coordinates;
+import com.tompy.common.Coordinates2DImpl;
 import com.tompy.directive.ActionType;
 import com.tompy.directive.TriggerType;
 import com.tompy.entity.EntityFacadeBuilderFactory;
@@ -47,8 +49,12 @@ public class Maze extends AdventureImpl implements Adventure {
 
     private Area[] createRooms() {
         Area[] rooms = new Area[size * size];
-        for (int i = 0; i < size * size; i++) {
-            rooms[i] = buildArea(String.format("Room-%d", i));
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int i = (y * size) + x;
+                Coordinates coordinates = new Coordinates2DImpl(x, y);
+                rooms[i] = buildArea(String.format("Room-%d", i), coordinates);
+            }
         }
 
         return rooms;
