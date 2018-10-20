@@ -2,7 +2,6 @@
 target/
 out/
 *.class
-*.xml
 
 # Log file
 *.log
