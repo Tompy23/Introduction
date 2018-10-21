@@ -3,6 +3,8 @@ package com.tompy.maze;
 
 import com.tompy.adventure.Adventure;
 import com.tompy.attribute.AttributeManagerFactoryImpl;
+import com.tompy.entity.Actor.MoveStrategyFactory;
+import com.tompy.entity.Actor.MoveStrategyFactoryImpl;
 import com.tompy.entity.EntityFacadeBuilderFactoryImpl;
 import com.tompy.entity.EntityService;
 import com.tompy.entity.EntityServiceImpl;
@@ -46,6 +48,8 @@ public class AppMaze {
 
         AdventureStateFactory stateFactory =
                 new AdventureStateFactoryImpl(player, adventure, ui, outStream, entityService);
+
+        MoveStrategyFactory moveStrategyFactory = new MoveStrategyFactoryImpl(player, adventure, entityService);
 
         LOGGER.info("Player [{}] enters the adventure", player.getName());
 
