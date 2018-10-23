@@ -77,6 +77,25 @@ public class Introduction extends AdventureImpl implements Adventure {
         describeAlways(room6, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
         describeAlways(room6, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
 
+        describeAlways(room1, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room1, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room1, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room2, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room2, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room2, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room3, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room3, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room3, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room4, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room4, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room4, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room5, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room5, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room5, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room6, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room6, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room6, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+
         // Exits
         Exit exit1 = buildExit(room1, DIRECTION_NORTH, room2, DIRECTION_SOUTH, false, 1);
         Exit exit2 = buildExit(room2, DIRECTION_EAST, room3, DIRECTION_WEST, false, 1);
