@@ -55,6 +55,25 @@ public class Introduction extends AdventureImpl implements Adventure {
         Area room6 = buildArea("room6");
         Area room7 = buildArea("room7");
 
+        describeAlways(room1, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room1, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room1, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room2, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room2, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room2, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room3, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room3, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room3, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room4, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room4, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room4, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room5, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room5, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room5, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+        describeAlways(room6, EVENT_AREA_PRE_FEATURE_SEARCH, "pre.feature.search");
+        describeAlways(room6, EVENT_AREA_PRE_ITEM_SEARCH, "pre.item.search");
+        describeAlways(room6, EVENT_AREA_PRE_FEATURE_DIRECTION_SEARCH, "pre.feature.direction.search");
+
         // Exits
         Exit exit1 = buildExit(room1, DIRECTION_NORTH, room2, DIRECTION_SOUTH, false);
         Exit exit2 = buildExit(room2, DIRECTION_EAST, room3, DIRECTION_WEST, false);
@@ -77,6 +96,8 @@ public class Introduction extends AdventureImpl implements Adventure {
         addEvent(room1Chest, EVENT_FEATURE_OPEN, room1ChestOpen2);
         describeAlways(room1Chest, EVENT_FEATURE_CLOSE, "room1.chest.close");
         describeAlways(room1Chest, EVENT_FEATURE_OPEN_BUT_LOCKED, "room1.chest.open.locked");
+        describeAlways(room1Chest, EVENT_FEATURE_LOCK, "room1.chest.lock");
+        describeAlways(room1Chest, EVENT_FEATURE_UNLOCK, "room1.chest.unlock");
 
         Feature room1NorthDoor =
                 featureBuilder(FEATURE_DOOR, "room1.door.north").name("room1NorthDoor").exit(exit1).build();
@@ -96,11 +117,15 @@ public class Introduction extends AdventureImpl implements Adventure {
         add(gem1, VALUE, 5);
         room1Chest.addItem(gem1);
 
+        describeAlways(room1, EVENT_AREA_WEST_SEARCH, "room1.search.east.west");
+        describeAlways(room1, EVENT_AREA_EAST_SEARCH, "room1.search.east.west");
+
 
         // Room 2
         Feature room2NorthDoor =
                 featureBuilder(FEATURE_DOOR, "room2.door.north").name("room2NorthDoor").exit(exit6).build();
         remove(room2NorthDoor, VISIBLE);
+        describeAlways(room2NorthDoor, EVENT_FEATURE_SEARCH, "room2.door.north.search");
 
         Event room2NorthDoorOpen1 =
                 eventBuilder(ACTION_DESCRIBE, TRIGGER_ONCE, room2NorthDoor, "room2.door.north.open.1").build();
@@ -113,6 +138,9 @@ public class Introduction extends AdventureImpl implements Adventure {
         Feature room2EastDoor =
                 featureBuilder(FEATURE_DOOR, "room2.door.east").name("room2EastDoor").exit(exit2).build();
         add(room2EastDoor, LOCKED);
+
+        describeAlways(room2EastDoor, EVENT_FEATURE_UNLOCK, "room2.door.east.unlock");
+        describeAlways(room2EastDoor, EVENT_FEATURE_LOCK, "room2.door.east.lock");
 
         describeAlways(room2EastDoor, EVENT_FEATURE_OPEN, "room2.door.east.open");
         describeAlways(room2EastDoor, EVENT_FEATURE_OPEN_BUT_LOCKED, "room2.door.east.open.locked");
@@ -161,10 +189,20 @@ public class Introduction extends AdventureImpl implements Adventure {
         room2.installFeature(room1NorthDoor, DIRECTION_SOUTH);
         room2.installFeature(room2NorthDoor, DIRECTION_NORTH);
 
+        Feature northPortrait = buildFeature(FEATURE_BASIC, "room2.portrait.north", "northPortrait");
+        room2.installFeature(northPortrait, DIRECTION_NORTH);
+
+        Feature westPortrait = buildFeature(FEATURE_BASIC, "room2.portrait.west", "westPortrait");
+        room2.installFeature(westPortrait, DIRECTION_WEST);
+
+        describeAlways(northPortrait, EVENT_FEATURE_SEARCH, "room2.portrait.north.search");
+        describeAlways(westPortrait, EVENT_FEATURE_SEARCH, "room2.portrait.west.search");
+
         // Key for east door is in room 1
         Item key1 = itemBuilder(ITEM_KEY, "key1").targetFeature(room2EastDoor).build();
         add(key1, VISIBLE);
         room1.addItem(key1);
+        describeAlways(key1, EVENT_ITEM_MISUSE, "key1.misuse");
 
 
         // Room 3
@@ -185,12 +223,20 @@ public class Introduction extends AdventureImpl implements Adventure {
         Item key2 = itemBuilder(ITEM_KEY, "key2").targetFeature(room1Chest).build();
         add(key2, VISIBLE);
         room3.addItem(key2);
+        describeAlways(key2, EVENT_ITEM_MISUSE, "key2.misuse");
+
+        describeAlways(room3, EVENT_AREA_EAST_SEARCH, "room3.search.east.south");
+        describeAlways(room3, EVENT_AREA_SOUTH_SEARCH, "room3.search.east.south");
 
 
         // Room 4
         describeAlways(room4, EVENT_AREA_ENTER, "room4.enter.1", "room4.enter.2", "room4.enter.3");
         describeAlways(room4, EVENT_AREA_SEARCH, "room4.enter.1", "room4.enter.2", "room4.enter.3");
         describeAlways(room4, EVENT_AREA_ENTER_WEST, "room4.enter.west");
+        describeAlways(room4, EVENT_AREA_WEST_SEARCH, "room4.search.west");
+        describeAlways(room4, EVENT_AREA_EAST_SEARCH, "room4.search.east");
+        describeAlways(room4, EVENT_AREA_SOUTH_SEARCH, "room4.search.south");
+        describeAlways(room4, EVENT_AREA_NORTH_SEARCH, "room4.search.north");
 
         // Room 5 merchant
         // Prerequisite from room 6
